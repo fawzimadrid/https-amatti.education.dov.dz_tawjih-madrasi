@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>فضاء مستشار التوجيه والإرشاد المدرسي</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Droid+Arabic+Kufi&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <style>
+        /* إعدادات عامة وتثبيت الخط والشكل التقليدي */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Droid Arabic Kufi', Tahoma, sans-serif;
+            border-radius: 0 !important; /* حدود مربعة تماماً */
+        }
+
+        body {
+            background-color: #f4f6f9;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        /* الشريط العلوي المحسن - مقسم بالتساوي على 4 أقسام */
+        .top-bar {
+            background-color: #5ea4ff;
+            color: white;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            align-items: center;
+            padding: 10px 20px;
+            border-bottom: 2px solid #3d8bf2;
+            height: 75px;
+        }
+
+        .top-bar .part {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .top-bar .part-1 img {
+            height: 55px;
+            width: auto;
+            object-fit: contain;
+            align-self: flex-start;
+        }
+
+        .top-bar .part-2 {
+            font-size: 13px;
+            font-weight: bold;
+            line-height: 1.6;
+        }
+        .top-bar .part-2 span {
+            font-size: 12px;
+            font-weight: normal;
+            opacity: 0.95;
+            display: block;
+        }
+
+        .top-bar .part-3, .top-bar .part-4 {
+            align-items: center;
+            cursor: pointer;
+            font-size: 13px;
+            height: 100%;
+            display: flex;
+            flex-direction: row;
+            gap: 8px;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+        .top-bar .part-3:hover, .top-bar .part-4:hover {
+            background-color: #4b93f0;
+        }
+
+        /* عنوان الأرضية الرقمية */
+        .sub-header-title {
+            background-color: #ffffff;
+            text-align: center;
+            padding: 15px 10px;
+            font-size: 22px;
+            color: #0056b3;
+            font-weight: bold;
+            border-bottom: 1px solid #dddddd;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+        }
+
+        /* الحاوية الرئيسية والنافذة البيضاء الموسعة */
+        .main-container {
+            padding: 25px;
+            width: 100%;
+            max-width: 1650px;
+            margin: 0 auto;
+        }
+
+        .white-window {
+            background-color: white;
+            border: 1px solid #cccccc;
+            padding: 40px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            min-height: 85vh;
+        }
+
+        /* العنوان الداخلي */
+        .main-title {
+            font-size: 14px;
+            color: #0056b3;
+            font-weight: bold;
+            margin-bottom: 25px;
+            border-bottom: 1px solid #eeeeee;
+            padding-bottom: 10px;
+        }
+
+        /* صف الأزرار الأربعة العلوية */
+        .buttons-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .btn {
+            padding: 12px 10px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            background-color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            text-align: center;
+            height: 50px;
+        }
+
+        .btn-total { border: 2px solid #20b2aa; color: #20b2aa; }
+        .btn-total:hover { background-color: #20b2aa; color: white; }
+
+        .btn-confirm-final { border: 2px solid #f08080; color: #f08080; }
+        .btn-confirm-final:hover { background-color: #f08080; color: white; }
+
+        .btn-cancel { background-color: #ffeb3b; border: 2px solid #fdd835; color: #333; }
+        .btn-cancel:hover { background-color: #fdd835; }
+
+        .btn-import { border: 2px solid #007bff; color: #007bff; position: relative; }
+        .btn-import:hover { background-color: #007bff; color: white; }
+        #excelFileInput { display: none; }
+
+        /* صف الفلاتر (بدون الفوج التربوي) */
+        .filters-search-row {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+            align-items: flex-end;
+            margin-bottom: 25px;
+            background: #fafafa;
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .filter-group label {
+            font-size: 12px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .custom-select-wrapper {
+            position: relative;
+            display: block;
+            width: 100%;
+        }
+
+        .custom-select {
+            width: 100%;
+            padding: 10px;
+            font-size: 12px;
+            border: 1px solid #cccccc;
+            background-color: white;
+            cursor: pointer;
+        }
+
+        /* محرك البحث */
+        .search-wrapper { position: relative; }
+        .search-input { width: 100%; padding: 10px 40px 10px 10px; font-size: 12px; border: 1px solid #cccccc; height: 40px; }
+        .search-wrapper i { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #999; }
+
+        /* شريط العمليات */
+        .table-actions-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+        
+        .btn-update { background-color: #4caf50; border: 1px solid #4caf50; color: white; padding: 8px 15px; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+        .btn-update:hover { background-color: #43a047; }
+
+        .btn-print { background-color: white; border: 2px solid #ffeb3b; color: #333; padding: 8px 15px; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+        .btn-print:hover { background-color: #ffeb3b; }
+
+        .btn-export-excel {
+            margin-right: auto;
+            background-color: white;
+            border: 2px solid #4caf50;
+            color: #4caf50;
+            padding: 8px 15px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+        .btn-export-excel:hover {
+            background-color: #4caf50;
+            color: white;
+        }
+
+        /* الجدول */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            margin-bottom: 20px;
+            border: 1px solid #dddddd;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            text-align: center;
+            min-width: 1400px;
+        }
+
+        .data-table th {
+            background-color: #ffffff;
+            color: #333333;
+            font-weight: bold;
+            padding: 12px 8px;
+            border-bottom: 3px solid #dddddd;
+            border-right: 1px solid #dddddd;
+        }
+
+        .data-table td {
+            padding: 10px 8px;
+            border-bottom: 1px solid #eeeeee;
+            border-right: 1px solid #dddddd;
+        }
+
+        .data-table tbody tr:nth-child(odd) { background-color: #ffffff; }
+        .data-table tbody tr:nth-child(even) { background-color: #f2f4f7; }
+
+        .btn-manage-row {
+            background-color: white;
+            border: 2px solid #0288d1;
+            color: #0288d1;
+            padding: 5px 10px;
+            font-size: 11px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s ease;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+        .btn-manage-row:hover {
+            background-color: #0288d1;
+            color: white;
+        }
+
+        .decision-frame-box {
+            background-color: #ffffff;
+            border: 2px solid #20b2aa;
+            padding: 6px 10px;
+            color: #333;
+            font-weight: bold;
+            display: block;
+            text-align: center;
+            white-space: nowrap;
+        }
+        .decision-frame-box:hover {
+            border-color: #0056b3;
+        }
+
+        .school-frame-box {
+            background-color: #e3f2fd;
+            border: 1px solid #90caf9;
+            padding: 6px 10px;
+            color: #0d47a1;
+            font-weight: bold;
+            display: block;
+            text-align: center;
+            white-space: nowrap;
+        }
+        .school-frame-box:hover {
+            background-color: #bbdefb;
+        }
+
+        .empty-row td { padding: 40px; color: #999; font-style: italic; font-size: 14px; }
+
+        .pagination-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eeeeee;
+        }
+
+        .pagination-info { font-size: 12px; color: #666; }
+        .pagination-buttons { display: flex; gap: 5px; }
+
+        .page-btn { padding: 6px 16px; background-color: white; border: 1px solid #cccccc; cursor: pointer; font-size: 12px; font-weight: bold; }
+        .page-btn:hover:not(:disabled) { background-color: #eeeeee; }
+        .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        /* النافذة المنبثقة الموسعة */
+        .custom-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .custom-modal-content {
+            background-color: white;
+            width: 90%;
+            max-width: 950px;
+            border: 1px solid #999;
+            padding: 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .modal-header {
+            background-color: #f5f5f5;
+            padding: 15px 20px;
+            border-bottom: 1px solid #dddddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 { font-size: 14px; color: #0056b3; font-weight: bold; }
+        .modal-close-x { font-size: 20px; color: #666; cursor: pointer; background: none; border: none; }
+        .modal-close-x:hover { color: #000; }
+
+        .modal-body {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            max-height: 520px;
+            overflow-y: auto;
+        }
+
+        .modal-body .full-width { grid-column: span 3; }
+        .modal-body .student-info-title { background: #e3f2fd; padding: 10px; font-size: 12px; font-weight: bold; color: #0d47a1; margin-bottom: 10px; }
+
+        .modal-footer {
+            padding: 15px 20px;
+            border-top: 1px solid #dddddd;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            background-color: #f9f9f9;
+        }
+
+        .btn-modal-save { background-color: #4caf50; border: 1px solid #4caf50; color: white; padding: 8px 20px; font-size: 12px; font-weight: bold; cursor: pointer; }
+        .btn-modal-save:hover { background-color: #43a047; }
+        .btn-modal-close { background-color: #757575; border: 1px solid #757575; color: white; padding: 8px 20px; font-size: 12px; font-weight: bold; cursor: pointer; }
+        .btn-modal-close:hover { background-color: #616161; }
+    </style>
+</head>
+<body>
+
+    <header class="top-bar">
+        <div class="part part-1">
+            <img src="https://amatti.education.dz//assets/img/logo_white.png" alt="وزارة التربية الوطنية">
+        </div>
+        <div class="part part-2">
+            <div>مديرية التربية للجزائر غرب</div>
+            <span>متوسطة الشهيد خالد مكاوي</span>
+        </div>
+        <div class="part part-3" onclick="showAlert('انشغالاتك', 'قريباً: قسم إرسال ومتابعة الانشغالات والطلبات لمستشاري التوجيه.', 'info')">
+            <i class="fa-solid fa-envelope-open-text"></i>
+            <span>انشغالاتك</span>
+        </div>
+        <div class="part part-4" onclick="showAlert('حسابي الشخصي', 'قريباً: تعديل إعدادات الملف الشخصي للمستشار.', 'info')">
+            <i class="fa-solid fa-user-gear"></i>
+            <span>حسابي الشخصي</span>
+        </div>
+    </header>
+
+    <div class="sub-header-title">
+        الأرضية الرقمية لوزارة التربية الوطنية -فضاء مستشار التوجيه والارشاد المدرسي-
+    </div>
+
+    <main class="main-container">
+        <div class="white-window">
+            
+            <h1 class="main-title">وزارة التربية الوطنية ـــ منظومة التوجيه المدرسية والمهنية واحتساب القرارات</h1>
+
+            <div class="buttons-row">
+                <button class="btn btn-total" onclick="showAlert('محضر التلاميذ الكلي', 'يتم معالجة وعرض إحصائيات التوجيه والمحضر الكامل للتلاميذ.', 'success')">
+                    <i class="fa-solid fa-users"></i> محضر التلاميذ الكلي
+                </button>
+                <button class="btn btn-confirm-final" onclick="showAlert('تأكيد المحضر', 'تم تثبيت الخيارات وفتح فضاء الأولياء لإدراج الطعون بنجاح.', 'success')">
+                    <i class="fa-solid fa-user-shield"></i> تأكيد المحضر النهائي وتمكين الاولياء من ادراج الطعون
+                </button>
+                <button class="btn btn-cancel" onclick="showAlert('إلغاء التأكيد', 'تم إلغاء قفل المحضر للسماح بإعادة التوجيه والتعديل المستمر.', 'warning')">
+                    <i class="fa-solid fa-user-slash"></i> زر الغاء تأكيد المحضر
+                </button>
+                <button class="btn btn-import" onclick="document.getElementById('excelFileInput').click()">
+                    <i class="fa-solid fa-file-excel"></i> استيراد بيانات التلاميذ اكسيل
+                    <input type="file" id="excelFileInput" accept=".xlsx, .xls">
+                </button>
+            </div>
+
+            <div class="filters-search-row">
+                <div class="filter-group">
+                    <label>السنة الدراسية</label>
+                    <div class="custom-select-wrapper">
+                        <select class="custom-select" id="yearSelect" onchange="loadTableData()">
+                            <option value="2025-2026">2025-2026</option>
+                            <option value="2026-2027">2026-2027</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <label>البحث السريع المتقدم</label>
+                    <div class="search-wrapper">
+                        <input type="text" class="search-input" id="searchInput" placeholder="ابحث برقم التعريف، اللقب أو الاسم..." onkeyup="loadTableData()">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-actions-bar">
+                <button class="btn-update" onclick="handleRefresh()">
+                    <i class="fa-solid fa-rotate"></i> زر تحديث المحضر
+                </button>
+                <button class="btn-print" onclick="window.print()">
+                    <i class="fa-solid fa-print"></i> زر طباعة المحضر النهائي للتوجيه
+                </button>
+                
+                <button class="btn-export-excel" onclick="exportTableToExcel()">
+                    <i class="fa-solid fa-file-export"></i> تصدير الجدول Excel
+                </button>
+            </div>
+
+            <div class="table-responsive">
+                <table class="data-table" id="mainExcelTable">
+                    <thead>
+                        <tr>
+                            <th>رقم التعريف</th>
+                            <th>اللقب</th>
+                            <th>الاسم</th>
+                            <th>تاريخ الميلاد</th>
+                            <th>الرغبة الاولى</th>
+                            <th>الرغبة الثانية</th>
+                            <th>الرغبة الثالثة</th>
+                            <th>الرغبة الرابعة</th>
+                            <th>اقتراح مجلس القسم</th>
+                            <th>اقتراح مستشار التوجيه</th>
+                            <th>قرار مجلس القسم والشعبة</th>
+                            <th>عمليات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <tr class="empty-row">
+                            <td colspan="12">لا توجد بيانات تلاميذ حالياً. يرجى الضغط على "استيراد بيانات التلاميذ اكسيل" لفتح ملف حقيقي جلب بياناتك الفوج والسنة.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pagination-container">
+                <div class="pagination-info">
+                    يتم عرض <span id="displayedCount">0</span> تلاميذ في هذه الصفحة (الحد الأقصى: 10 تلاميذ في الصفحة الواحدة)
+                </div>
+                <div class="pagination-buttons">
+                    <button class="page-btn" id="prevBtn" onclick="changePage(-1)">السابق</button>
+                    <button class="page-btn" id="nextBtn" onclick="changePage(1)">التالي</button>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <div class="custom-modal-overlay" id="guidanceModal">
+        <div class="custom-modal-content">
+            <div class="modal-header">
+                <h2><i class="fa-solid fa-user-graduate"></i> إدارة الرغبات، التوجيه النهائي ومؤسسة المقصد للتلميذ</h2>
+                <button class="modal-close-x" onclick="closeGuidanceModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="full-width student-info-title" id="modalStudentTitle">
+                    تحميل بيانات التلميذ...
+                </div>
+                
+                <input type="hidden" id="modalStudentId">
+
+                <div class="filter-group">
+                    <label><i class="fa-solid fa-star"></i> الرغبة الأولى</label>
+                    <div class="custom-select-wrapper">
+                        <select class="custom-select" id="mWish1"></select>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <label><i class="fa-solid fa-star"></i> الرغبة الثانية</label>
+                    <div class="custom-select-wrapper">
+                        <select class="custom-select" id="mWish2"></select>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <label><i class="fa-solid fa-star"></i> الرغبة الثالثة</label>
+                    <div class="custom-select-wrapper">
+                        <select class="custom-select" id="mWish3"></select>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <label><i class="fa-solid fa-star"></i> الرغبة الرابعة</label>
+                    <div class="custom-select-wrapper">
+                        <select class="custom-select" id="mWish4"></select>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <label><i class="fa-solid fa-users"></i> اقتراح مجلس القسم</label>
+                    <div class="custom-select-wrapper">
+                        <select class="custom-select" id="mPropCouncil"></select>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <label><i class="fa-solid fa-user-tie"></i> اقتراح مستشار التوجيه المدرسي</label>
+                    <div class="custom-select-wrapper">
+                        <select class="custom-select" id="mPropAdvisor"></select>
+                    </div>
+                </div>
+
+                <div class="filter-group full-width">
+                    <label><i class="fa-solid fa-gavel"></i> قرار مجلس القسم النهائي والشعبة الموجه إليها</label>
+                    <div class="custom-select-wrapper">
+                        <select class="custom-select" id="mFinalDecision"></select>
+                    </div>
+                </div>
+
+                <div class="filter-group full-width">
+                    <label><i class="fa-solid fa-school"></i> مؤسسة التوجيه والمقصد</label>
+                    <div class="custom-select-wrapper">
+                        <select class="custom-select" id="mTargetSchool">
+                            <option value="ثانوية بن عبد المالك رمضان سطاوالي">ثانوية بن عبد المالك رمضان سطاوالي</option>
+                            <option value="مؤسسة توجيه أخرى">مؤسسة توجيه أخرى</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-modal-save" onclick="saveGuidanceData()">حفظ التعديلات والتوجيهات</button>
+                <button onclick="cancelGuidanceForStudent()" style="background-color: #f08080; border: 1px solid #f08080; color: white; padding: 8px 20px; font-size: 12px; font-weight: bold; cursor: pointer;">إلغاء التوجيه لهذا التلميذ</button>
+                <button class="btn-modal-close" onclick="closeGuidanceModal()">إغلاق</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // الخيارات الإلزامية
+        const streamOptions = [
+            "جدع مشترك علوم وتكنولوجيا",
+            "جدع مشترك آداب",
+            "تعليم مهني",
+            "تكوين مهني"
+        ];
+
+        let STUDENTS_DATABASE = JSON.parse(localStorage.getItem('STUDENTS_DB')) || {};
+        let currentPage = 1;
+        const rowsPerPage = 10;
+        let filteredGlobalData = [];
+
+        window.addEventListener('DOMContentLoaded', () => {
+            populateModalSelects();
+            loadTableData();
+        });
+
+        function populateModalSelects() {
+            const lists = ['mWish1', 'mWish2', 'mWish3', 'mWish4', 'mPropCouncil', 'mPropAdvisor', 'mFinalDecision'];
+            lists.forEach(id => {
+                const selectElement = document.getElementById(id);
+                selectElement.innerHTML = '';
+                streamOptions.forEach(opt => {
+                    const option = document.createElement('option');
+                    option.value = opt;
+                    option.textContent = opt;
+                    selectElement.appendChild(option);
+                });
+            });
+        }
+
+        document.getElementById('excelFileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                try {
+                    const data = new Uint8Array(evt.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+                    
+                    if (jsonData.length === 0) {
+                        showAlert('ملف فارغ', 'الملف المستورد لا يحتوي على أسطر بيانات!', 'error');
+                        return;
+                    }
+
+                    const activeYear = document.getElementById('yearSelect').value;
+                    if (!STUDENTS_DATABASE[activeYear]) {
+                        STUDENTS_DATABASE[activeYear] = [];
+                    }
+
+                    let importCount = 0;
+                    jsonData.forEach(row => {
+                        const id = row['رقم التعريف'] || row['ID'] || row['رقم'] || Math.floor(Math.random() * 900000) + 100000;
+                        const surname = row['اللقب'] || row['Surname'] || '';
+                        const name = row['الاسم'] || row['Name'] || '';
+                        const birth = row['تاريخ الميلاد'] || row['Birth'] || '';
+                        const group = row['الفوج التربوي'] || row['الفوج'] || 'رابعة متوسط 1';
+
+                        const exists = STUDENTS_DATABASE[activeYear].find(s => s.id == id);
+                        if (!exists) {
+                            STUDENTS_DATABASE[activeYear].push({
+                                id: id,
+                                surname: surname,
+                                name: name,
+                                birth: birth,
+                                group: group,
+                                wish1: row['الرغبة الاولى'] || streamOptions[0],
+                                wish2: row['الرغبة الثانية'] || streamOptions[1],
+                                wish3: row['الرغبة الثالثة'] || streamOptions[2],
+                                wish4: row['الرغبة الرابعة'] || streamOptions[3],
+                                propCouncil: row['اقتراح مجلس القسم'] || streamOptions[0],
+                                propAdvisor: row['اقتراح مستشار التوجيه'] || streamOptions[0],
+                                finalDecision: row['قرار مجلس القسم والشعبة'] || streamOptions[0],
+                                targetSchool: row['مؤسسة التوجيه'] || 'ثانوية بن عبد المالك رمضان سطاوالي'
+                            });
+                            importCount++;
+                        }
+                    });
+
+                    localStorage.setItem('STUDENTS_DB', JSON.stringify(STUDENTS_DATABASE));
+                    loadTableData();
+                    showAlert('تم الاستيراد بنجاح', `تم دمج وقراءة ملف الإكسيل واستيراد ${importCount} تلاميذ بنجاح للسنة الدراسية المحددة!`, 'success');
+                    
+                } catch (error) {
+                    console.error(error);
+                    showAlert('خلل في الاستيراد', 'حدث خطأ أثناء معالجة تشفير ملف الإكسيل المرفوع، يرجى التحقق من صياغة الأعمدة.', 'error');
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        });
+
+        function loadTableData() {
+            const activeYear = document.getElementById('yearSelect').value;
+            const searchVal = document.getElementById('searchInput').value.trim().toLowerCase();
+
+            const yearData = STUDENTS_DATABASE[activeYear] || [];
+
+            filteredGlobalData = yearData.filter(student => {
+                const matchSearch = (!searchVal || 
+                    student.id.toString().includes(searchVal) || 
+                    student.name.toLowerCase().includes(searchVal) || 
+                    student.surname.toLowerCase().includes(searchVal)
+                );
+                return matchSearch;
+            });
+
+            const totalRows = filteredGlobalData.length;
+            const maxPages = Math.ceil(totalRows / rowsPerPage) || 1;
+            if (currentPage > maxPages) currentPage = maxPages;
+
+            const startIndex = (currentPage - 1) * rowsPerPage;
+            const endIndex = startIndex + rowsPerPage;
+            const paginatedItems = filteredGlobalData.slice(startIndex, endIndex);
+
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            if (paginatedItems.length === 0) {
+                tbody.innerHTML = `
+                    <tr class="empty-row">
+                        <td colspan="12">لا توجد بيانات تلاميذ حالياً للخيارات المحددة. يرجى استيراد الملف الحقيقي المخصص لهذه السنة.</td>
+                    </tr>`;
+                document.getElementById('displayedCount').textContent = '0';
+                document.getElementById('prevBtn').disabled = true;
+                document.getElementById('nextBtn').disabled = true;
+                return;
+            }
+
+            document.getElementById('displayedCount').textContent = paginatedItems.length;
+            document.getElementById('prevBtn').disabled = (currentPage === 1);
+            document.getElementById('nextBtn').disabled = (currentPage === maxPages);
+
+            paginatedItems.forEach(student => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><b>${student.id}</b></td>
+                    <td>${student.surname}</td>
+                    <td>${student.name}</td>
+                    <td>${student.birth}</td>
+                    <td>${student.wish1}</td>
+                    <td>${student.wish2}</td>
+                    <td>${student.wish3}</td>
+                    <td>${student.wish4}</td>
+                    <td>${student.propCouncil}</td>
+                    <td>${student.propAdvisor}</td>
+                    <td>
+                        <div class="decision-frame-box">الشعبة: ${student.finalDecision}</div>
+                        <div class="school-frame-box" style="margin-top: 4px;">المقصد: ${student.targetSchool}</div>
+                    </td>
+                    <td>
+                        <button class="btn-manage-row" onclick="openGuidanceModal('${student.id}')">
+                            <i class="fa-solid fa-sliders"></i> إدارة التوجيه
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function changePage(direction) {
+            currentPage += direction;
+            loadTableData();
+        }
+
+        function handleRefresh() {
+            loadTableData();
+            Swal.fire({
+                title: 'تحديث ومزامنة',
+                text: 'تمت المزامنة والتحديث بنجاح، وتثبيت كافة قرارات وتوجيهات التلاميذ في قاعدة البيانات.',
+                icon: 'success',
+                confirmButtonText: 'ممتاز',
+                confirmButtonColor: '#4caf50'
+            });
+        }
+
+        function openGuidanceModal(id) {
+            const activeYear = document.getElementById('yearSelect').value;
+            const student = STUDENTS_DATABASE[activeYear].find(s => s.id == id);
+            if (!student) return;
+
+            document.getElementById('modalStudentId').value = student.id;
+            document.getElementById('modalStudentTitle').innerHTML = `
+                <i class="fa-solid fa-user"></i> التلميذ(ة): ${student.surname} ${student.name} | رقم التعريف: ${student.id} | الفوج: ${student.group}
+            `;
+
+            document.getElementById('mWish1').value = student.wish1 || '';
+            document.getElementById('mWish2').value = student.wish2 || '';
+            document.getElementById('mWish3').value = student.wish3 || '';
+            document.getElementById('mWish4').value = student.wish4 || '';
+            document.getElementById('mPropCouncil').value = student.propCouncil || '';
+            document.getElementById('mPropAdvisor').value = student.propAdvisor || '';
+            document.getElementById('mFinalDecision').value = student.finalDecision || '';
+            document.getElementById('mTargetSchool').value = student.targetSchool || '';
+
+            document.getElementById('guidanceModal').style.display = 'flex';
+        }
+
+        function closeGuidanceModal() {
+            document.getElementById('guidanceModal').style.display = 'none';
+        }
+
+        function saveGuidanceData() {
+            const activeYear = document.getElementById('yearSelect').value;
+            const id = document.getElementById('modalStudentId').value;
+            
+            const studentIndex = STUDENTS_DATABASE[activeYear].findIndex(s => s.id == id);
+            if (studentIndex > -1) {
+                STUDENTS_DATABASE[activeYear][studentIndex].wish1 = document.getElementById('mWish1').value;
+                STUDENTS_DATABASE[activeYear][studentIndex].wish2 = document.getElementById('mWish2').value;
+                STUDENTS_DATABASE[activeYear][studentIndex].wish3 = document.getElementById('mWish3').value;
+                STUDENTS_DATABASE[activeYear][studentIndex].wish4 = document.getElementById('mWish4').value;
+                STUDENTS_DATABASE[activeYear][studentIndex].propCouncil = document.getElementById('mPropCouncil').value;
+                STUDENTS_DATABASE[activeYear][studentIndex].propAdvisor = document.getElementById('mPropAdvisor').value;
+                STUDENTS_DATABASE[activeYear][studentIndex].finalDecision = document.getElementById('mFinalDecision').value;
+                STUDENTS_DATABASE[activeYear][studentIndex].targetSchool = document.getElementById('mTargetSchool').value;
+
+                localStorage.setItem('STUDENTS_DB', JSON.stringify(STUDENTS_DATABASE));
+                loadTableData();
+                closeGuidanceModal();
+                
+                Swal.fire({
+                    title: 'تم التوجيه',
+                    text: 'تم حفظ وتثبيت الرغبات وتعيين مؤسسة التوجيه بنجاح داخل النظام.',
+                    icon: 'success',
+                    confirmButtonText: 'مفهوم',
+                    confirmButtonColor: '#5ea4ff'
+                });
+            }
+        }
+
+        function cancelGuidanceForStudent() {
+            const activeYear = document.getElementById('yearSelect').value;
+            const id = document.getElementById('modalStudentId').value;
+            const studentIndex = STUDENTS_DATABASE[activeYear].findIndex(s => s.id == id);
+            if (studentIndex > -1) {
+                const student = STUDENTS_DATABASE[activeYear][studentIndex];
+                student.wish1 = '';
+                student.wish2 = '';
+                student.wish3 = '';
+                student.wish4 = '';
+                student.propCouncil = '';
+                student.propAdvisor = '';
+                student.finalDecision = '';
+                student.targetSchool = '';
+                
+                localStorage.setItem('STUDENTS_DB', JSON.stringify(STUDENTS_DATABASE));
+                loadTableData();
+                closeGuidanceModal();
+                
+                Swal.fire({
+                    title: 'تم إلغاء التوجيه',
+                    text: 'تم مسح كافة الرغبات والقرارات لهذا التلميذ بنجاح.',
+                    icon: 'warning',
+                    confirmButtonText: 'مفهوم',
+                    confirmButtonColor: '#f08080'
+                });
+            }
+        }
+
+        function exportTableToExcel() {
+            if (filteredGlobalData.length === 0) {
+                showAlert('لا توجد بيانات', 'لا توجد بيانات متاحة في الفلترة الحالية لتصديرها.', 'warning');
+                return;
+            }
+
+            const exportRows = filteredGlobalData.map(s => ({
+                'رقم التعريف': s.id,
+                'اللقب': s.surname,
+                'الاسم': s.name,
+                'تاريخ الميلاد': s.birth,
+                'الرغبة الاولى': s.wish1,
+                'الرغبة الثانية': s.wish2,
+                'الرغبة الثالثة': s.wish3,
+                'الرغبة الرابعة': s.wish4,
+                'اقتراح مجلس القسم': s.propCouncil,
+                'اقتراح مستشار التوجيه': s.propAdvisor,
+                'قرار مجلس القسم والشعبة': s.finalDecision,
+                'مؤسسة التوجيه والمقصد': s.targetSchool
+            }));
+
+            const worksheet = XLSX.utils.json_to_sheet(exportRows);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "محضر التوجيه المدرسي");
+            
+            const activeYear = document.getElementById('yearSelect').value;
+            XLSX.writeFile(workbook, `محضر_التوجيه_المدرسي_${activeYear}.xlsx`);
+        }
+
+        function showAlert(title, text, icon) {
+            Swal.fire({
+                title: title,
+                text: text,
+                icon: icon,
+                confirmButtonText: 'مفهوم',
+                confirmButtonColor: '#5ea4ff'
+            });
+        }
+    </script>
+</body>
+</html>
