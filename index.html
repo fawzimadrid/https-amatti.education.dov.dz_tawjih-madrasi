@@ -252,7 +252,7 @@
         .data-table tbody tr:nth-child(odd) { background-color: #ffffff; }
         .data-table tbody tr:nth-child(even) { background-color: #f2f4f7; }
 
-        .btn-manage-row {
+        .btn-manage-row, .btn-school-edit {
             background-color: white;
             border: 2px solid #0288d1;
             color: #0288d1;
@@ -266,10 +266,16 @@
             align-items: center;
             justify-content: center;
             gap: 4px;
+            margin-bottom: 4px;
         }
-        .btn-manage-row:hover {
+        .btn-manage-row:hover, .btn-school-edit:hover {
             background-color: #0288d1;
             color: white;
+        }
+
+        .btn-school-edit {
+            border-color: #43a047;
+            color: #43a047;
         }
 
         /* معدل BEM */
@@ -429,6 +435,16 @@
 
         .btn-modal-save { background-color: #4caf50; border: 1px solid #4caf50; color: white; padding: 9px 22px; font-size: 13px; font-weight: bold; cursor: pointer; }
         .btn-modal-close { background-color: #757575; border: 1px solid #757575; color: white; padding: 9px 22px; font-size: 13px; font-weight: bold; cursor: pointer; }
+
+        /* New simple school modal */
+        .school-modal-content {
+            max-width: 520px;
+            padding: 0;
+        }
+        .school-modal-body {
+            padding: 30px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -472,8 +488,8 @@
                     <button class="btn btn-total" onclick="showAlert('محضر التلاميذ الكلي', 'يتم معالجة وعرض إحصائيات التوجيه والمحضر الكامل للتلاميذ.', 'success')">
                         <i class="fa-solid fa-users"></i> محضر التلاميذ الكلي
                     </button>
-                    <button class="btn btn-confirm-final" onclick="confirmAllDecisions()">
-                        <i class="fa-solid fa-user-shield"></i> تأكيد القرارات النهائية
+                    <button class="btn btn-confirm-final" onclick="confirmAllDecisions()" style="opacity:0.6; pointer-events:none;">
+                        <i class="fa-solid fa-user-shield"></i> تأكيد القرارات النهائية (مغلق)
                     </button>
                     <button class="btn btn-cancel" onclick="cancelAllConfirm()">
                         <i class="fa-solid fa-user-slash"></i> إلغاء تأكيد المحضر
@@ -512,8 +528,8 @@
                     <button class="btn-update" onclick="handleRefresh()">
                         <i class="fa-solid fa-rotate"></i> تحديث المحضر
                     </button>
-                    <button class="btn-confirm-all" onclick="confirmAllDecisions()">
-                        <i class="fa-solid fa-lock"></i> حجز القرار النهائي
+                    <button class="btn-confirm-all" onclick="confirmAllDecisions()" style="opacity:0.6; pointer-events:none;">
+                        <i class="fa-solid fa-lock"></i> حجز القرار النهائي (مغلق)
                     </button>
                     <button class="btn-reopen" onclick="reopenOperation()" style="background:#ff9800;border-color:#ff9800;">
                         <i class="fa-solid fa-unlock"></i> إعادة فتح العملية
@@ -542,6 +558,7 @@
                                 <th>اقتراح مجلس القسم</th>
                                 <th>اقتراح مستشار التوجيه</th>
                                 <th>قرار مجلس القسم والشعبة</th>
+                                <th>مؤسسة التوجيه</th>
                                 <th>عمليات</th>
                             </tr>
                         </thead>
@@ -575,58 +592,49 @@
         </div>
     </main>
 
-    <!-- Modal -->
+    <!-- Old Modal (kept but disabled for wishes) -->
     <div class="custom-modal-overlay" id="guidanceModal">
         <div class="custom-modal-content">
             <div class="modal-header">
-                <h2><i class="fa-solid fa-user-graduate"></i> إدارة الرغبات، التوجيه النهائي ومؤسسة المقصد</h2>
+                <h2><i class="fa-solid fa-user-graduate"></i> إدارة الرغبات والتوجيه (مغلق حالياً)</h2>
                 <button class="modal-close-x" onclick="closeGuidanceModal()">×</button>
             </div>
             <div class="modal-body">
-                <div class="full-width student-info-title" id="modalStudentTitle"></div>
-                <input type="hidden" id="modalStudentId">
+                <p style="grid-column: span 3; text-align:center; color:#d32f2f; font-weight:bold;">
+                    عملية إدارة الرغبات والقرارات النهائية مغلقة.<br>
+                    يمكنك فقط تعديل مؤسسة التوجيه.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-modal-close" onclick="closeGuidanceModal()">إغلاق</button>
+            </div>
+        </div>
+    </div>
 
-                <div class="filter-group">
-                    <label>الرغبة الأولى</label>
-                    <select class="custom-select" id="mWish1"></select>
-                </div>
-                <div class="filter-group">
-                    <label>الرغبة الثانية</label>
-                    <select class="custom-select" id="mWish2"></select>
-                </div>
-                <div class="filter-group">
-                    <label>الرغبة الثالثة</label>
-                    <select class="custom-select" id="mWish3"></select>
-                </div>
-                <div class="filter-group">
-                    <label>الرغبة الرابعة</label>
-                    <select class="custom-select" id="mWish4"></select>
-                </div>
+    <!-- New School Edit Modal -->
+    <div class="custom-modal-overlay" id="schoolEditModal">
+        <div class="custom-modal-content school-modal-content">
+            <div class="modal-header">
+                <h2><i class="fa-solid fa-school"></i> تعديل مؤسسة التوجيه</h2>
+                <button class="modal-close-x" onclick="closeSchoolModal()">×</button>
+            </div>
+            <div class="modal-body school-modal-body">
+                <div class="full-width student-info-title" id="schoolModalStudentTitle" style="margin-bottom:20px; font-size:15px;"></div>
+                <input type="hidden" id="schoolModalStudentId">
 
-                <div class="filter-group">
-                    <label>اقتراح مجلس القسم</label>
-                    <select class="custom-select" id="mPropCouncil"></select>
-                </div>
-                <div class="filter-group">
-                    <label>اقتراح مستشار التوجيه</label>
-                    <select class="custom-select" id="mPropAdvisor"></select>
-                </div>
                 <div class="filter-group full-width">
-                    <label>قرار مجلس القسم والشعبة الموجه إليها</label>
-                    <select class="custom-select" id="mFinalDecision"></select>
-                </div>
-                <div class="filter-group full-width">
-                    <label>مؤسسة التوجيه والمقصد</label>
-                    <select class="custom-select" id="mTargetSchool">
-                        <option value="ثانوية بن عبد المالك رمضان سطاوالي">ثانوية بن عبد المالك رمضان سطاوالي</option>
+                    <label>مؤسسة التوجيه</label>
+                    <select class="custom-select" id="schoolSelect" style="font-size:14px; padding:12px;">
+                        <option value="">-- اختر --</option>
+                        <option value="ثانوية بن عبد المالك رمضان (سطاوالي)">ثانوية بن عبد المالك رمضان (سطاوالي)</option>
+                        <option value="ثانوية العقيد عميروش (سطاوالي)">ثانوية العقيد عميروش (سطاوالي)</option>
                         <option value="مؤسسة توجيه أخرى">مؤسسة توجيه أخرى</option>
                     </select>
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn-modal-save" onclick="saveGuidanceData()">حفظ التعديلات</button>
-                <button onclick="cancelGuidanceForStudent()" style="background:#f08080;border:1px solid #f08080;color:white;padding:9px 22px;font-weight:bold;cursor:pointer;">إلغاء التوجيه</button>
-                <button class="btn-modal-close" onclick="closeGuidanceModal()">إغلاق</button>
+                <button class="btn-modal-save" onclick="saveSchoolChange()">تأكيد التعديل</button>
+                <button class="btn-modal-close" onclick="closeSchoolModal()">إلغاء</button>
             </div>
         </div>
     </div>
@@ -648,7 +656,6 @@
         const deadlineDate = "2026-07-03T00:00:00";
 
         window.addEventListener('DOMContentLoaded', () => {
-            populateModalSelects();
             loadTableData();
             updateDeadlineAlert();
         });
@@ -659,22 +666,6 @@
             if (now < deadline) {
                 console.log(`%c العملية مفتوحة حتى ${deadlineDate}`, 'color:#d32f2f;font-weight:bold');
             }
-        }
-
-        function populateModalSelects() {
-            const lists = ['mWish1','mWish2','mPropCouncil','mPropAdvisor','mFinalDecision'];
-            lists.forEach(id => {
-                const sel = document.getElementById(id);
-                sel.innerHTML = '';
-                streamOptions.forEach(opt => {
-                    const o = document.createElement('option');
-                    o.value = opt; o.textContent = opt;
-                    sel.appendChild(o);
-                });
-            });
-            // Wish 3 and 4 fixed
-            document.getElementById('mWish3').innerHTML = `<option value="تكوين مهني">تكوين مهني</option>`;
-            document.getElementById('mWish4').innerHTML = `<option value="تعليم مهني">تعليم مهني</option>`;
         }
 
         // Import main data
@@ -725,7 +716,7 @@
                                 propCouncil: row['اقتراح مجلس القسم'] || streamOptions[0],
                                 propAdvisor: row['اقتراح مستشار التوجيه'] || streamOptions[0],
                                 finalDecision: row['قرار مجلس القسم والشعبة'] || '',
-                                targetSchool: row['مؤسسة التوجيه'] || 'ثانوية بن عبد المالك رمضان سطاوالي'
+                                targetSchool: row['مؤسسة التوجيه'] || 'ثانوية بن عبد المالك رمضان (سطاوالي)'
                             };
                             STUDENTS_DATABASE[activeYear].push(student);
                         }
@@ -769,7 +760,7 @@
             tbody.innerHTML = '';
 
             if (paginated.length === 0) {
-                tbody.innerHTML = `<tr class="empty-row"><td colspan="13">لا توجد بيانات. يرجى استيراد الملفات.</td></tr>`;
+                tbody.innerHTML = `<tr class="empty-row"><td colspan="14">لا توجد بيانات. يرجى استيراد الملفات.</td></tr>`;
                 document.getElementById('displayedCount').textContent = '0';
                 return;
             }
@@ -793,12 +784,17 @@
                     <td>
                         <div class="decision-school-box">
                             <strong>الشعبة:</strong> ${student.finalDecision || 'غير محدد'}<br>
-                            <strong>المقصد:</strong> ${student.targetSchool || 'غير محدد'}
+                            <strong>مؤسسة التوجيه:</strong> ${student.targetSchool || 'غير محدد'}
                         </div>
                     </td>
                     <td>
-                        <button class="btn-manage-row" onclick="openGuidanceModal('${student.id}')">
-                            <i class="fa-solid fa-sliders"></i> حجز القرار
+                        <button class="btn-school-edit" onclick="openSchoolEditModal('${student.id}')">
+                            <i class="fa-solid fa-school"></i> تعديل المؤسسة
+                        </button>
+                    </td>
+                    <td>
+                        <button class="btn-manage-row" onclick="openGuidanceModal('${student.id}')" style="opacity:0.6; pointer-events:none;">
+                            <i class="fa-solid fa-sliders"></i> حجز القرار (مغلق)
                         </button>
                     </td>
                 `;
@@ -814,25 +810,8 @@
             loadTableData();
         }
 
+        // Old modal (now only shows message)
         function openGuidanceModal(id) {
-            const activeYear = document.getElementById('yearSelect').value;
-            const student = STUDENTS_DATABASE[activeYear]?.find(s => s.id == id);
-            if (!student) return;
-
-            document.getElementById('modalStudentId').value = student.id;
-            document.getElementById('modalStudentTitle').innerHTML = `
-                التلميذ: <b>${student.surname} ${student.name}</b> | رقم: ${student.id} | معدل: ${student.bemAverage || '—'}
-            `;
-
-            document.getElementById('mWish1').value = student.wish1 || streamOptions[0];
-            document.getElementById('mWish2').value = student.wish2 || streamOptions[1];
-            document.getElementById('mWish3').value = "تكوين مهني";
-            document.getElementById('mWish4').value = "تعليم مهني";
-            document.getElementById('mPropCouncil').value = student.propCouncil || '';
-            document.getElementById('mPropAdvisor').value = student.propAdvisor || '';
-            document.getElementById('mFinalDecision').value = student.finalDecision || '';
-            document.getElementById('mTargetSchool').value = student.targetSchool || '';
-
             document.getElementById('guidanceModal').style.display = 'flex';
         }
 
@@ -840,40 +819,39 @@
             document.getElementById('guidanceModal').style.display = 'none';
         }
 
-        function saveGuidanceData() {
+        // New School Edit Modal
+        function openSchoolEditModal(id) {
             const activeYear = document.getElementById('yearSelect').value;
-            const id = document.getElementById('modalStudentId').value;
+            const student = STUDENTS_DATABASE[activeYear]?.find(s => s.id == id);
+            if (!student) return;
+
+            document.getElementById('schoolModalStudentId').value = student.id;
+            document.getElementById('schoolModalStudentTitle').innerHTML = `
+                التلميذ: <b>${student.surname} ${student.name}</b> | رقم: ${student.id}
+            `;
+
+            document.getElementById('schoolSelect').value = student.targetSchool || '';
+            document.getElementById('schoolEditModal').style.display = 'flex';
+        }
+
+        function closeSchoolModal() {
+            document.getElementById('schoolEditModal').style.display = 'none';
+        }
+
+        function saveSchoolChange() {
+            const activeYear = document.getElementById('yearSelect').value;
+            const id = document.getElementById('schoolModalStudentId').value;
+            const newSchool = document.getElementById('schoolSelect').value;
+
             const idx = STUDENTS_DATABASE[activeYear].findIndex(s => s.id == id);
             if (idx === -1) return;
 
-            const student = STUDENTS_DATABASE[activeYear][idx];
-            student.wish1 = document.getElementById('mWish1').value;
-            student.wish2 = document.getElementById('mWish2').value;
-            student.wish3 = "تكوين مهني";
-            student.wish4 = "تعليم مهني";
-            student.propCouncil = document.getElementById('mPropCouncil').value;
-            student.propAdvisor = document.getElementById('mPropAdvisor').value;
-            student.finalDecision = document.getElementById('mFinalDecision').value;
-            student.targetSchool = document.getElementById('mTargetSchool').value;
+            STUDENTS_DATABASE[activeYear][idx].targetSchool = newSchool;
 
             localStorage.setItem('STUDENTS_DB', JSON.stringify(STUDENTS_DATABASE));
             loadTableData();
-            closeGuidanceModal();
-            showAlert('تم الحفظ', 'تم حفظ القرار النهائي بنجاح.', 'success');
-        }
-
-        function cancelGuidanceForStudent() {
-            const activeYear = document.getElementById('yearSelect').value;
-            const id = document.getElementById('modalStudentId').value;
-            const idx = STUDENTS_DATABASE[activeYear].findIndex(s => s.id == id);
-            if (idx > -1) {
-                const s = STUDENTS_DATABASE[activeYear][idx];
-                s.wish1 = s.wish2 = s.wish3 = s.wish4 = s.propCouncil = s.propAdvisor = s.finalDecision = s.targetSchool = '';
-                localStorage.setItem('STUDENTS_DB', JSON.stringify(STUDENTS_DATABASE));
-                loadTableData();
-                closeGuidanceModal();
-                showAlert('تم الإلغاء', 'تم إلغاء التوجيه لهذا التلميذ.', 'warning');
-            }
+            closeSchoolModal();
+            showAlert('تم الحفظ', 'تم تعديل مؤسسة التوجيه بنجاح.', 'success');
         }
 
         function handleRefresh() {
@@ -882,9 +860,7 @@
         }
 
         function confirmAllDecisions() {
-            if (confirm("هل تريد تأكيد وحجز كافة القرارات النهائية؟\nستغلق العملية بعد ذلك.")) {
-                showAlert('تم التأكيد', 'تم حجز القرارات النهائية وإغلاق العملية حتى ' + deadlineDate, 'success');
-            }
+            showAlert('العملية مغلقة', 'عملية تأكيد القرارات النهائية مغلقة حالياً.', 'info');
         }
 
         function reopenOperation() {
@@ -912,7 +888,7 @@
                 'اقتراح المجلس': s.propCouncil,
                 'اقتراح المستشار': s.propAdvisor,
                 'القرار النهائي': s.finalDecision,
-                'المؤسسة': s.targetSchool
+                'مؤسسة التوجيه': s.targetSchool
             }));
             const ws = XLSX.utils.json_to_sheet(data);
             const wb = XLSX.utils.book_new();
