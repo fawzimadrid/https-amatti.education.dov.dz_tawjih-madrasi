@@ -377,21 +377,477 @@
             color: #0056b3;
         }
 
-        /* جدول الإحصائيات */
-        .stats-table {
+        /* Modal */
+        .custom-modal-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .custom-modal-content {
+            background-color: white;
+            width: 90%;
+            max-width: 980px;
+            border: 1px solid #999;
+            padding: 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .modal-header {
+            background-color: #f5f5f5;
+            padding: 15px 20px;
+            border-bottom: 1px solid #dddddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 { font-size: 14px; color: #0056b3; font-weight: bold; }
+        .modal-close-x { font-size: 22px; color: #666; cursor: pointer; background: none; border: none; }
+        .modal-close-x:hover { color: #000; }
+
+        .modal-body {
+            padding: 25px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+            max-height: 560px;
+            overflow-y: auto;
+        }
+
+        .modal-body .full-width { grid-column: span 3; }
+        .modal-footer {
+            padding: 15px 20px;
+            border-top: 1px solid #dddddd;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            background-color: #f9f9f9;
+        }
+
+        .btn-modal-save { background-color: #4caf50; border: 1px solid #4caf50; color: white; padding: 9px 22px; font-size: 13px; font-weight: bold; cursor: pointer; }
+        .btn-modal-close { background-color: #757575; border: 1px solid #757575; color: white; padding: 9px 22px; font-size: 13px; font-weight: bold; cursor: pointer; }
+
+        /* New styles for school edit modal */
+        .school-edit-modal .modal-body {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="top-bar">
+        <div class="part part-1">
+            <img src="https://amatti.education.dz//assets/img/logo_white.png" alt="وزارة التربية الوطنية">
+        </div>
+        <div class="part part-2">
+            <div>مديرية التربية للجزائر غرب</div>
+            <span>متوسطة الشهيد خالد مكاوي</span>
+        </div>
+        <div class="part part-3" onclick="showAlert('انشغالاتك', 'قريباً: قسم إرسال ومتابعة الانشغالات والطلبات لمستشاري التوجيه.', 'info')">
+            <i class="fa-solid fa-envelope-open-text"></i>
+            <span>انشغالاتك</span>
+        </div>
+        <div class="part part-4" onclick="showAlert('حسابي الشخصي', 'قريباً: تعديل إعدادات الملف الشخصي للمستشار.', 'info')">
+            <i class="fa-solid fa-user-gear"></i>
+            <span>حسابي الشخصي</span>
+        </div>
+    </header>
+
+    <div class="sub-header-title">
+        الأرضية الرقمية لوزارة التربية الوطنية -فضاء مستشار التوجيه والارشاد المدرسي-
+    </div>
+
+    <main class="main-container">
+        <div class="white-window">
+            
+            <h1 class="main-title">وزارة التربية الوطنية ـــ منظومة التوجيه المدرسية والمهنية واحتساب القرارات</h1>
+
+            <!-- تبويبات -->
+            <div class="tabs">
+                <div class```html
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>فضاء مستشار التوجيه والإرشاد المدرسي</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Droid+Arabic+Kufi&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Droid Arabic Kufi', Tahoma, sans-serif;
+            border-radius: 0 !important;
+        }
+
+        body {
+            background-color: #f4f6f9;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        /* الشريط العلوي - مقسم بالتساوي على 4 أجزاء */
+        .top-bar {
+            background-color: #5ea4ff;
+            color: white;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            align-items: center;
+            padding: 10px 20px;
+            border-bottom: 2px solid #3d8bf2;
+            height: 75px;
+        }
+
+        .top-bar .part {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .top-bar .part-1 img {
+            height: 55px;
+            width: auto;
+            object-fit: contain;
+            align-self: flex-start;
+        }
+
+        .top-bar .part-2 {
+            font-size: 13px;
+            font-weight: bold;
+            line-height: 1.6;
+        }
+        .top-bar .part-2 span {
+            font-size: 12px;
+            font-weight: normal;
+            opacity: 0.95;
+            display: block;
+        }
+
+        .top-bar .part-3, .top-bar .part-4 {
+            align-items: center;
+            cursor: pointer;
+            font-size: 13px;
+            height: 100%;
+            display: flex;
+            flex-direction: row;
+            gap: 8px;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+        .top-bar .part-3:hover, .top-bar .part-4:hover {
+            background-color: #4b93f0;
+        }
+
+        .sub-header-title {
+            background-color: #ffffff;
+            text-align: center;
+            padding: 15px 10px;
+            font-size: 22px;
+            color: #0056b3;
+            font-weight: bold;
+            border-bottom: 1px solid #dddddd;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+        }
+
+        .main-container {
+            padding: 25px;
+            width: 100%;
+            max-width: 1750px;
+            margin: 0 auto;
+        }
+
+        .white-window {
+            background-color: white;
+            border: 1px solid #cccccc;
+            padding: 40px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            min-height: 92vh;
+        }
+
+        .main-title {
+            font-size: 14px;
+            color: #0056b3;
+            font-weight: bold;
+            margin-bottom: 25px;
+            border-bottom: 1px solid #eeeeee;
+            padding-bottom: 10px;
+        }
+
+        .buttons-row {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .btn {
+            padding: 12px 10px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            background-color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            text-align: center;
+            height: 52px;
+        }
+
+        .btn-total { border: 2px solid #20b2aa; color: #20b2aa; }
+        .btn-total:hover { background-color: #20b2aa; color: white; }
+
+        .btn-confirm-final { border: 2px solid #f08080; color: #f08080; }
+        .btn-confirm-final:hover { background-color: #f08080; color: white; }
+
+        .btn-cancel { background-color: #ffeb3b; border: 2px solid #fdd835; color: #333; }
+        .btn-cancel:hover { background-color: #fdd835; }
+
+        .btn-import { border: 2px solid #007bff; color: #007bff; }
+        .btn-import:hover { background-color: #007bff; color: white; }
+
+        .btn-import-average { 
+            border: 2px solid #ff9800; 
+            color: #ff9800; 
+        }
+        .btn-import-average:hover { 
+            background-color: #ff9800; 
+            color: white; 
+        }
+
+        .btn-stats { border: 2px solid #8e24aa; color: #8e24aa; }
+        .btn-stats:hover { background-color: #8e24aa; color: white; }
+
+        #excelFileInput, #averageFileInput { display: none; }
+
+        .filters-search-row {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+            align-items: flex-end;
+            margin-bottom: 25px;
+            background: #fafafa;
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .filter-group label {
+            font-size: 12px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .custom-select-wrapper {
+            position: relative;
+            display: block;
+            width: 100%;
+        }
+
+        .custom-select {
+            width: 100%;
+            padding: 10px;
+            font-size: 12px;
+            border: 1px solid #cccccc;
+            background-color: white;
+            cursor: pointer;
+        }
+
+        .search-wrapper { position: relative; }
+        .search-input { width: 100%; padding: 10px 40px 10px 10px; font-size: 12px; border: 1px solid #cccccc; height: 40px; }
+        .search-wrapper i { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #999; }
+
+        .table-actions-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .btn-update, .btn-confirm-all, .btn-reopen { 
+            background-color: #4caf50; 
+            border: 1px solid #4caf50; 
+            color: white; 
+            padding: 8px 15px; 
+            font-size: 12px; 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            gap: 5px; 
+        }
+
+        .btn-print { background-color: white; border: 2px solid #ffeb3b; color: #333; padding: 8px 15px; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+        .btn-export-excel { margin-right: auto; background-color: white; border: 2px solid #4caf50; color: #4caf50; padding: 8px 15px; font-size: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+
+        .data-table {
             width: 100%;
             border-collapse: collapse;
-            margin: 20px 0;
-            font-size: 13px;
-        }
-        .stats-table th, .stats-table td {
-            padding: 12px;
+            font-size: 12px;
             text-align: center;
-            border: 1px solid #ddd;
+            min-width: 1600px;
         }
-        .stats-table th {
-            background-color: #0056b3;
+
+        .data-table th {
+            background-color: #ffffff;
+            color: #333333;
+            font-weight: bold;
+            padding: 12px 8px;
+            border-bottom: 3px solid #dddddd;
+            border-right: 1px solid #dddddd;
+        }
+
+        .data-table td {
+            padding: 10px 8px;
+            border-bottom: 1px solid #eeeeee;
+            border-right: 1px solid #dddddd;
+        }
+
+        .data-table tbody tr:nth-child(odd) { background-color: #ffffff; }
+        .data-table tbody tr:nth-child(even) { background-color: #f2f4f7; }
+
+        .btn-manage-row {
+            background-color: white;
+            border: 2px solid #0288d1;
+            color: #0288d1;
+            padding: 5px 10px;
+            font-size: 11px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s ease;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+        .btn-manage-row:hover {
+            background-color: #0288d1;
             color: white;
+        }
+
+        /* معدل BEM */
+        .bem-average-box {
+            background-color: #ff9800;
+            color: white;
+            padding: 6px 10px;
+            font-weight: bold;
+            display: inline-block;
+            border-radius: 4px;
+            min-width: 70px;
+        }
+        .bem-average-box.low {
+            background-color: #333333 !important;
+        }
+
+        /* قرار مجلس + مؤسسة */
+        .decision-school-box {
+            background-color: #ffffff;
+            border: 2px solid #0288d1;
+            padding: 8px 12px;
+            color: #0d47a1;
+            font-weight: bold;
+            display: block;
+            text-align: center;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+        }
+        .decision-school-box:hover {
+            border-color: #43a047;
+            background-color: #e8f5e9;
+            color: #1b5e20;
+        }
+
+        .empty-row td { padding: 40px; color: #999; font-style: italic; font-size: 14px; }
+
+        .pagination-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eeeeee;
+        }
+
+        .pagination-info { font-size: 12px; color: #666; }
+        .pagination-buttons { display: flex; gap: 5px; }
+
+        .page-btn { 
+            padding: 8px 20px; 
+            background-color: white; 
+            border: 1px solid #cccccc; 
+            cursor: pointer; 
+            font-size: 12px; 
+            font-weight: bold; 
+        }
+        .page-btn:hover:not(:disabled) { background-color: #eeeeee; }
+        .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        /* تبويب الإحصائيات */
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ddd;
+        }
+        .tab {
+            padding: 12px 25px;
+            cursor: pointer;
+            font-weight: bold;
+            border: 1px solid transparent;
+            border-bottom: none;
+            margin-right: 5px;
+        }
+        .tab.active {
+            background: white;
+            border-color: #ddd;
+            border-bottom-color: white;
+            color: #0056b3;
+        }
+
+        .stats-container {
+            display: none;
+        }
+        .stats-container.active {
+            display: block;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #0056b3;
         }
 
         /* Modal */
@@ -450,8 +906,8 @@
         .btn-modal-save { background-color: #4caf50; border: 1px solid #4caf50; color: white; padding: 9px 22px; font-size: 13px; font-weight: bold; cursor: pointer; }
         .btn-modal-close { background-color: #757575; border: 1px solid #757575; color: white; padding: 9px 22px; font-size: 13px; font-weight: bold; cursor: pointer; }
 
-        /* Modal خاص بتعديل المؤسسة */
-        #institutionModal .modal-body {
+        /* New styles for school edit modal */
+        .school-edit-modal .modal-body {
             display: block;
         }
     </style>
@@ -594,26 +1050,17 @@
                 <div class="stats-grid" id="statsGrid">
                     <!-- Filled by JS -->
                 </div>
-                <table class="stats-table" id="statsTable">
-                    <thead>
-                        <tr>
-                            <th>الشعبة</th>
-                            <th>عدد الموجهين</th>
-                        </tr>
-                    </thead>
-                    <tbody id="statsTableBody">
-                        <!-- Filled by JS -->
-                    </tbody>
-                </table>
                 <button class="btn-export-excel" onclick="exportStatsToExcel()" style="margin-top:20px;">
                     <i class="fa-solid fa-file-export"></i> تصدير الإحصائيات إلى Excel
                 </button>
             </div>
 
-            <!-- تبويب طلبات الطعن -->
+            <!-- قسم طلبات الطعن -->
             <div id="appeals-content" class="stats-container">
                 <div class="table-actions-bar">
-                    <h2 style="margin:0;">طلبات الطعن في الشعبة (حوالي 25 تلميذ)</h2>
+                    <button class="btn-export-excel" onclick="exportAppealsToExcel()">
+                        <i class="fa-solid fa-file-export"></i> تصدير طلبات الطعن
+                    </button>
                 </div>
                 <div class="table-responsive">
                     <table class="data-table" id="appealsTable">
@@ -622,11 +1069,13 @@
                                 <th>رقم التعريف</th>
                                 <th>اللقب</th>
                                 <th>الاسم</th>
+                                <th>معدل ش.ت.م</th>
                                 <th>الشعبة الحالية</th>
+                                <th>طلب الطعن (الشعبة المطلوبة)</th>
                                 <th>عمليات</th>
                             </tr>
                         </thead>
-                        <tbody id="appealsTableBody">
+                        <tbody id="appealsBody">
                             <!-- Filled by JS -->
                         </tbody>
                     </table>
@@ -636,7 +1085,7 @@
         </div>
     </main>
 
-    <!-- Modal التوجيه الرئيسي (محدود) -->
+    <!-- Modal التوجيه الرئيسي (محدث) -->
     <div class="custom-modal-overlay" id="guidanceModal">
         <div class="custom-modal-content">
             <div class="modal-header">
@@ -647,9 +1096,33 @@
                 <div class="full-width student-info-title" id="modalStudentTitle"></div>
                 <input type="hidden" id="modalStudentId">
 
-                <!-- تم إغلاق معظم الحقول للتوجيه النهائي كما طُلب -->
+                <div class="filter-group">
+                    <label>الرغبة الأولى</label>
+                    <select class="custom-select" id="mWish1"></select>
+                </div>
+                <div class="filter-group">
+                    <label>الرغبة الثانية</label>
+                    <select class="custom-select" id="mWish2"></select>
+                </div>
+                <div class="filter-group">
+                    <label>الرغبة الثالثة</label>
+                    <select class="custom-select" id="mWish3"></select>
+                </div>
+                <div class="filter-group">
+                    <label>الرغبة الرابعة</label>
+                    <select class="custom-select" id="mWish4"></select>
+                </div>
+
+                <div class="filter-group">
+                    <label>اقتراح مجلس القسم</label>
+                    <select class="custom-select" id="mPropCouncil"></select>
+                </div>
+                <div class="filter-group">
+                    <label>اقتراح مستشار التوجيه</label>
+                    <select class="custom-select" id="mPropAdvisor"></select>
+                </div>
                 <div class="filter-group full-width">
-                    <label>قرار مجلس القسم والشعبة</label>
+                    <label>قرار مجلس القسم والشعبة الموجه إليها</label>
                     <select class="custom-select" id="mFinalDecision"></select>
                 </div>
                 <div class="filter-group full-width">
@@ -668,19 +1141,19 @@
         </div>
     </div>
 
-    <!-- Modal تعديل مؤسسة التوجيه -->
-    <div class="custom-modal-overlay" id="institutionModal">
-        <div class="custom-modal-content" style="max-width: 520px;">
+    <!-- Modal تعديل مؤسسة التوجيه فقط -->
+    <div class="custom-modal-overlay" id="schoolEditModal">
+        <div class="custom-modal-content school-edit-modal">
             <div class="modal-header">
                 <h2><i class="fa-solid fa-school"></i> تعديل مؤسسة التوجيه</h2>
-                <button class="modal-close-x" onclick="closeInstitutionModal()">×</button>
+                <button class="modal-close-x" onclick="closeSchoolEditModal()">×</button>
             </div>
             <div class="modal-body">
-                <div class="full-width student-info-title" id="instStudentTitle" style="margin-bottom:20px;"></div>
-                <input type="hidden" id="instStudentId">
+                <div class="full-width student-info-title" id="schoolModalStudentTitle"></div>
+                <input type="hidden" id="schoolModalStudentId">
                 <div class="filter-group full-width">
-                    <label>اختر مؤسسة التوجيه</label>
-                    <select class="custom-select" id="instSelect">
+                    <label>مؤسسة التوجيه</label>
+                    <select class="custom-select" id="schoolSelect">
                         <option value="">-- اختر --</option>
                         <option value="ثانوية بن عبد المالك رمضان (سطاوالي)">ثانوية بن عبد المالك رمضان (سطاوالي)</option>
                         <option value="ثانوية العقيد عميروش (سطاوالي)">ثانوية العقيد عميروش (سطاوالي)</option>
@@ -688,22 +1161,22 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn-modal-save" onclick="saveInstitutionChange()">تأكيد التعديل</button>
-                <button class="btn-modal-close" onclick="closeInstitutionModal()">إلغاء</button>
+                <button class="btn-modal-save" onclick="saveSchoolEdit()">تأكيد التعديل</button>
+                <button class="btn-modal-close" onclick="closeSchoolEditModal()">إلغاء</button>
             </div>
         </div>
     </div>
 
-    <!-- Modal طعن في الشعبة -->
+    <!-- Modal إدراج طعن -->
     <div class="custom-modal-overlay" id="appealModal">
-        <div class="custom-modal-content" style="max-width: 520px;">
+        <div class="custom-modal-content">
             <div class="modal-header">
                 <h2><i class="fa-solid fa-gavel"></i> إدراج طعن في الشعبة</h2>
                 <button class="modal-close-x" onclick="closeAppealModal()">×</button>
             </div>
             <div class="modal-body">
-                <div class="full-width student-info-title" id="appealStudentTitle" style="margin-bottom:20px;"></div>
-                <input type="hidden" id="appealStudentId">
+                <div class="full-width student-info-title" id="appealModalStudentTitle"></div>
+                <input type="hidden" id="appealModalStudentId">
                 <div class="filter-group full-width">
                     <label>الشعبة المطلوبة</label>
                     <select class="custom-select" id="appealStreamSelect">
@@ -714,7 +1187,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn-modal-save" onclick="submitAppeal()">تأكيد الطعن</button>
+                <button class="btn-modal-save" onclick="submitAppeal()">إدراج الطعن</button>
                 <button class="btn-modal-close" onclick="closeAppealModal()">إلغاء</button>
             </div>
         </div>
@@ -733,16 +1206,16 @@
         const rowsPerPage = 10;
         let filteredGlobalData = [];
         let currentTab = 0;
-        let appealsData = []; // بيانات الطعون
+        let appealsData = []; // For appeals tab (sample ~25 students)
 
         const deadlineDate = "2026-07-03T00:00:00";
 
         window.addEventListener('DOMContentLoaded', () => {
             populateModalSelects();
+            // Sample data for appeals
+            initializeSampleAppeals();
             loadTableData();
             updateDeadlineAlert();
-            // إنشاء بيانات طعون تجريبية (25 تلميذ)
-            createSampleAppeals();
         });
 
         function updateDeadlineAlert() {
@@ -754,26 +1227,55 @@
         }
 
         function populateModalSelects() {
-            const lists = ['mFinalDecision'];
+            const lists = ['mWish1','mWish2','mPropCouncil','mPropAdvisor','mFinalDecision'];
             lists.forEach(id => {
                 const sel = document.getElementById(id);
-                if (sel) {
-                    sel.innerHTML = '';
-                    streamOptions.forEach(opt => {
-                        const o = document.createElement('option');
-                        o.value = opt; o.textContent = opt;
-                        sel.appendChild(o);
-                    });
-                }
+                sel.innerHTML = '';
+                streamOptions.forEach(opt => {
+                    const o = document.createElement('option');
+                    o.value = opt; o.textContent = opt;
+                    sel.appendChild(o);
+                });
             });
+            document.getElementById('mWish3').innerHTML = `<option value="تكوين مهني">تكوين مهني</option>`;
+            document.getElementById('mWish4').innerHTML = `<option value="تعليم مهني">تعليم مهني</option>`;
         }
 
-        // Import main data
+        function initializeSampleAppeals() {
+            // Generate ~25 sample students for appeals if none exist
+            const activeYear = document.getElementById('yearSelect').value;
+            if (!STUDENTS_DATABASE[activeYear]) STUDENTS_DATABASE[activeYear] = [];
+            if (STUDENTS_DATABASE[activeYear].length < 25) {
+                for (let i = 1; i <= 25; i++) {
+                    const id = `ST${String(i).padStart(4, '0')}`;
+                    if (!STUDENTS_DATABASE[activeYear].find(s => s.id === id)) {
+                        STUDENTS_DATABASE[activeYear].push({
+                            id: id,
+                            surname: `الطالب${i}`,
+                            name: `أحمد`,
+                            birth: '2009-05-15',
+                            bemAverage: (8 + Math.random() * 4).toFixed(2),
+                            wish1: streamOptions[0],
+                            wish2: streamOptions[1],
+                            wish3: "تكوين مهني",
+                            wish4: "تعليم مهني",
+                            propCouncil: streamOptions[0],
+                            propAdvisor: streamOptions[1],
+                            finalDecision: i % 2 === 0 ? "جدع مشترك علوم وتكنولوجيا" : "جدع مشترك آداب",
+                            targetSchool: "ثانوية بن عبد المالك رمضان سطاوالي",
+                            appealRequested: i % 3 === 0 ? "جدع مشترك آداب" : null
+                        });
+                    }
+                }
+                localStorage.setItem('STUDENTS_DB', JSON.stringify(STUDENTS_DATABASE));
+            }
+        }
+
+        // Import functions (unchanged)
         document.getElementById('excelFileInput').addEventListener('change', function(e) {
             handleExcelImport(e, false);
         });
 
-        // Import averages
         document.getElementById('averageFileInput').addEventListener('change', function(e) {
             handleExcelImport(e, true);
         });
@@ -816,7 +1318,8 @@
                                 propCouncil: row['اقتراح مجلس القسم'] || streamOptions[0],
                                 propAdvisor: row['اقتراح مستشار التوجيه'] || streamOptions[0],
                                 finalDecision: row['قرار مجلس القسم والشعبة'] || '',
-                                targetSchool: row['مؤسسة التوجيه'] || 'ثانوية بن عبد المالك رمضان سطاوالي'
+                                targetSchool: row['مؤسسة التوجيه'] || 'ثانوية بن عبد المالك رمضان سطاوالي',
+                                appealRequested: null
                             };
                             STUDENTS_DATABASE[activeYear].push(student);
                         }
@@ -886,11 +1389,11 @@
                     <td>
                         <div class="decision-school-box">
                             <strong>الشعبة:</strong> ${student.finalDecision || 'غير محدد'}<br>
-                            <strong>مؤسسة التوجيه:</strong> ${student.targetSchool || 'غير محدد'}
+                            <strong>المؤسسة:</strong> ${student.targetSchool || 'غير محدد'}
                         </div>
                     </td>
                     <td>
-                        <button class="btn-manage-row" onclick="openInstitutionModal('${student.id}')" style="border-color:#ff9800;color:#ff9800;margin-bottom:4px;">
+                        <button class="btn-manage-row" onclick="openSchoolEditModal('${student.id}')" style="border-color:#0288d1;color:#0288d1;">
                             <i class="fa-solid fa-school"></i> تعديل المؤسسة
                         </button>
                     </td>
@@ -912,6 +1415,7 @@
             loadTableData();
         }
 
+        // Guidance modal (unchanged except label)
         function openGuidanceModal(id) {
             const activeYear = document.getElementById('yearSelect').value;
             const student = STUDENTS_DATABASE[activeYear]?.find(s => s.id == id);
@@ -922,6 +1426,12 @@
                 التلميذ: <b>${student.surname} ${student.name}</b> | رقم: ${student.id} | معدل: ${student.bemAverage || '—'}
             `;
 
+            document.getElementById('mWish1').value = student.wish1 || streamOptions[0];
+            document.getElementById('mWish2').value = student.wish2 || streamOptions[1];
+            document.getElementById('mWish3').value = "تكوين مهني";
+            document.getElementById('mWish4').value = "تعليم مهني";
+            document.getElementById('mPropCouncil').value = student.propCouncil || '';
+            document.getElementById('mPropAdvisor').value = student.propAdvisor || '';
             document.getElementById('mFinalDecision').value = student.finalDecision || '';
             document.getElementById('mTargetSchool').value = student.targetSchool || '';
 
@@ -939,6 +1449,12 @@
             if (idx === -1) return;
 
             const student = STUDENTS_DATABASE[activeYear][idx];
+            student.wish1 = document.getElementById('mWish1').value;
+            student.wish2 = document.getElementById('mWish2').value;
+            student.wish3 = "تكوين مهني";
+            student.wish4 = "تعليم مهني";
+            student.propCouncil = document.getElementById('mPropCouncil').value;
+            student.propAdvisor = document.getElementById('mPropAdvisor').value;
             student.finalDecision = document.getElementById('mFinalDecision').value;
             student.targetSchool = document.getElementById('mTargetSchool').value;
 
@@ -954,7 +1470,7 @@
             const idx = STUDENTS_DATABASE[activeYear].findIndex(s => s.id == id);
             if (idx > -1) {
                 const s = STUDENTS_DATABASE[activeYear][idx];
-                s.finalDecision = s.targetSchool = '';
+                s.wish1 = s.wish2 = s.wish3 = s.wish4 = s.propCouncil = s.propAdvisor = s.finalDecision = s.targetSchool = '';
                 localStorage.setItem('STUDENTS_DB', JSON.stringify(STUDENTS_DATABASE));
                 loadTableData();
                 closeGuidanceModal();
@@ -962,34 +1478,121 @@
             }
         }
 
-        // Modal تعديل المؤسسة
-        function openInstitutionModal(id) {
+        // New: School edit modal
+        function openSchoolEditModal(id) {
             const activeYear = document.getElementById('yearSelect').value;
             const student = STUDENTS_DATABASE[activeYear]?.find(s => s.id == id);
             if (!student) return;
 
-            document.getElementById('instStudentId').value = student.id;
-            document.getElementById('instStudentTitle').innerHTML = `التلميذ: <b>${student.surname} ${student.name}</b>`;
-            document.getElementById('instSelect').value = student.targetSchool || '';
-            document.getElementById('institutionModal').style.display = 'flex';
+            document.getElementById('schoolModalStudentId').value = student.id;
+            document.getElementById('schoolModalStudentTitle').innerHTML = `
+                التلميذ: <b>${student.surname} ${student.name}</b> | رقم: ${student.id}
+            `;
+            document.getElementById('schoolSelect').value = student.targetSchool || '';
+            document.getElementById('schoolEditModal').style.display = 'flex';
         }
 
-        function closeInstitutionModal() {
-            document.getElementById('institutionModal').style.display = 'none';
+        function closeSchoolEditModal() {
+            document.getElementById('schoolEditModal').style.display = 'none';
         }
 
-        function saveInstitutionChange() {
+        function saveSchoolEdit() {
             const activeYear = document.getElementById('yearSelect').value;
-            const id = document.getElementById('instStudentId').value;
-            const newSchool = document.getElementById('instSelect').value;
+            const id = document.getElementById('schoolModalStudentId').value;
+            const newSchool = document.getElementById('schoolSelect').value;
             const idx = STUDENTS_DATABASE[activeYear].findIndex(s => s.id == id);
             if (idx > -1 && newSchool) {
                 STUDENTS_DATABASE[activeYear][idx].targetSchool = newSchool;
                 localStorage.setItem('STUDENTS_DB', JSON.stringify(STUDENTS_DATABASE));
                 loadTableData();
-                closeInstitutionModal();
-                showAlert('تم التعديل', 'تم تغيير مؤسسة التوجيه بنجاح.', 'success');
+                closeSchoolEditModal();
+                showAlert('تم التعديل', 'تم تحديث مؤسسة التوجيه بنجاح.', 'success');
             }
+        }
+
+        // Appeals functions
+        function loadAppealsData() {
+            const activeYear = document.getElementById('yearSelect').value;
+            const yearData = STUDENTS_DATABASE[activeYear] || [];
+            // Filter students who have appeal or sample
+            appealsData = yearData.filter(s => s.appealRequested || Math.random() > 0.6).slice(0, 25);
+            
+            const tbody = document.getElementById('appealsBody');
+            tbody.innerHTML = '';
+
+            if (appealsData.length === 0) {
+                tbody.innerHTML = `<tr class="empty-row"><td colspan="7">لا توجد طلبات طعن حالياً.</td></tr>`;
+                return;
+            }
+
+            appealsData.forEach(student => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><b>${student.id}</b></td>
+                    <td>${student.surname || ''}</td>
+                    <td>${student.name || ''}</td>
+                    <td><div class="bem-average-box">${student.bemAverage || '—'}</div></td>
+                    <td>${student.finalDecision || 'غير محدد'}</td>
+                    <td>${student.appealRequested || '—'}</td>
+                    <td>
+                        <button class="btn-manage-row" onclick="openAppealModal('${student.id}')" style="border-color:#ff9800;color:#ff9800;">
+                            <i class="fa-solid fa-plus"></i> إدراج طعن
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function openAppealModal(id) {
+            const activeYear = document.getElementById('yearSelect').value;
+            const student = STUDENTS_DATABASE[activeYear]?.find(s => s.id == id);
+            if (!student) return;
+
+            document.getElementById('appealModalStudentId').value = student.id;
+            document.getElementById('appealModalStudentTitle').innerHTML = `
+                التلميذ: <b>${student.surname} ${student.name}</b> | رقم: ${student.id}
+            `;
+            document.getElementById('appealStreamSelect').value = '';
+            document.getElementById('appealModal').style.display = 'flex';
+        }
+
+        function closeAppealModal() {
+            document.getElementById('appealModal').style.display = 'none';
+        }
+
+        function submitAppeal() {
+            const activeYear = document.getElementById('yearSelect').value;
+            const id = document.getElementById('appealModalStudentId').value;
+            const newStream = document.getElementById('appealStreamSelect').value;
+            const idx = STUDENTS_DATABASE[activeYear].findIndex(s => s.id == id);
+            if (idx > -1 && newStream) {
+                const student = STUDENTS_DATABASE[activeYear][idx];
+                student.appealRequested = newStream;
+                // Automatically update final decision as requested
+                student.finalDecision = newStream;
+                localStorage.setItem('STUDENTS_DB', JSON.stringify(STUDENTS_DATABASE));
+                closeAppealModal();
+                loadAppealsData();
+                loadTableData();
+                showAlert('تم إدراج الطعن', 'تم تسجيل الطعن وتحديث قرار مجلس القسم والشعبة.', 'success');
+            }
+        }
+
+        function exportAppealsToExcel() {
+            if (appealsData.length === 0) return showAlert('لا بيانات', 'لا توجد طلبات طعن للتصدير', 'warning');
+            const data = appealsData.map(s => ({
+                'رقم التعريف': s.id,
+                'اللقب': s.surname,
+                'الاسم': s.name,
+                'معدل ش.ت.م': s.bemAverage,
+                'الشعبة الحالية': s.finalDecision,
+                'طلب الطعن': s.appealRequested || ''
+            }));
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "طلبات_الطعن");
+            XLSX.writeFile(wb, `طلبات_الطعن_${document.getElementById('yearSelect').value}.xlsx`);
         }
 
         function handleRefresh() {
@@ -1044,110 +1647,48 @@
             document.getElementById('appeals-content').style.display = tab === 2 ? 'block' : 'none';
             
             if (tab === 1) renderStatistics();
-            if (tab === 2) renderAppealsTable();
+            if (tab === 2) loadAppealsData();
         }
 
         function renderStatistics() {
             const container = document.getElementById('statsGrid');
-            const total = filteredGlobalData.length || 120;
-            container.innerHTML = `
-                <div class="stat-card"><div class="stat-number">${total}</div><div>إجمالي التلاميذ</div></div>
-                <div class="stat-card"><div class="stat-number">48</div><div>نسبة التوجيه العلمي %</div></div>
-                <div class="stat-card"><div class="stat-number">32</div><div>نسبة التوجيه الأدبي %</div></div>
-                <div class="stat-card"><div class="stat-number">40</div><div>متوسط معدل ش.ت.م</div></div>
-            `;
+            const activeYear = document.getElementById('yearSelect').value;
+            const data = STUDENTS_DATABASE[activeYear] || [];
+            
+            let sci = 0, lit = 0, prof1 = 0, prof2 = 0;
+            data.forEach(s => {
+                if (s.finalDecision.includes('علوم')) sci++;
+                else if (s.finalDecision.includes('آداب')) lit++;
+                else if (s.finalDecision.includes('تكوين')) prof1++;
+                else if (s.finalDecision.includes('تعليم')) prof2++;
+            });
 
-            // جدول الإحصائيات
-            const tbody = document.getElementById('statsTableBody');
-            tbody.innerHTML = `
-                <tr><td>جدع مشترك علوم وتكنولوجيا</td><td>58</td></tr>
-                <tr><td>جدع مشترك آداب</td><td>38</td></tr>
-                <tr><td>تكوين مهني</td><td>15</td></tr>
-                <tr><td>تعليم مهني</td><td>9</td></tr>
+            container.innerHTML = `
+                <div class="stat-card"><div class="stat-number">${data.length}</div><div>إجمالي التلاميذ</div></div>
+                <div class="stat-card"><div class="stat-number">${sci}</div><div>عدد الموجهين علوم</div></div>
+                <div class="stat-card"><div class="stat-number">${lit}</div><div>عدد الموجهين آداب</div></div>
+                <div class="stat-card"><div class="stat-number">${prof1}</div><div>عدد الموجهين تكوين مهني</div></div>
+                <div class="stat-card"><div class="stat-number">${prof2}</div><div>عدد الموجهين تعليم مهني</div></div>
+                <div class="stat-card"><div class="stat-number">${(data.reduce((a,s)=>a+(parseFloat(s.bemAverage)||0),0)/data.length||0).toFixed(2)}</div><div>متوسط معدل ش.ت.م</div></div>
             `;
         }
 
         function exportStatsToExcel() {
-            const stats = [
-                { 'الشعبة': 'جدع مشترك علوم وتكنولوجيا', 'العدد': 58 },
-                { 'الشعبة': 'جدع مشترك آداب', 'العدد': 38 },
-                { 'الشعبة': 'تكوين مهني', 'العدد': 15 },
-                { 'الشعبة': 'تعليم مهني', 'العدد': 9 }
+            const activeYear = document.getElementById('yearSelect').value;
+            const data = STUDENTS_DATABASE[activeYear] || [];
+            // Export full stats summary
+            const summary = [
+                {نوع: 'إجمالي', عدد: data.length},
+                {نوع: 'علوم', عدد: data.filter(s => s.finalDecision.includes('علوم')).length},
+                {نوع: 'آداب', عدد: data.filter(s => s.finalDecision.includes('آداب')).length},
+                {نوع: 'تكوين مهني', عدد: data.filter(s => s.finalDecision.includes('تكوين')).length},
+                {نوع: 'تعليم مهني', عدد: data.filter(s => s.finalDecision.includes('تعليم')).length}
             ];
-            const ws = XLSX.utils.json_to_sheet(stats);
+            const ws = XLSX.utils.json_to_sheet(summary);
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "إحصائيات_التوجيه");
-            XLSX.writeFile(wb, `إحصائيات_التوجيه_${document.getElementById('yearSelect').value}.xlsx`);
-            showAlert('تم التصدير', 'تم تصدير الإحصائيات بنجاح إلى Excel.', 'success');
-        }
-
-        // طلبات الطعن
-        function createSampleAppeals() {
-            appealsData = [];
-            const sampleStudents = filteredGlobalData.length > 0 ? filteredGlobalData.slice(0, 25) : [];
-            if (sampleStudents.length === 0) {
-                // بيانات افتراضية
-                for (let i = 1; i <= 25; i++) {
-                    appealsData.push({
-                        id: `STU00${i}`,
-                        surname: `الطالب ${i}`,
-                        name: `محمد`,
-                        currentStream: i % 2 === 0 ? "جدع مشترك آداب" : "جدع مشترك علوم وتكنولوجيا"
-                    });
-                }
-            } else {
-                sampleStudents.slice(0, 25).forEach(s => {
-                    appealsData.push({
-                        id: s.id,
-                        surname: s.surname,
-                        name: s.name,
-                        currentStream: s.finalDecision || "جدع مشترك علوم وتكنولوجيا"
-                    });
-                });
-            }
-        }
-
-        function renderAppealsTable() {
-            const tbody = document.getElementById('appealsTableBody');
-            tbody.innerHTML = '';
-            appealsData.forEach(student => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td><b>${student.id}</b></td>
-                    <td>${student.surname}</td>
-                    <td>${student.name}</td>
-                    <td>${student.currentStream}</td>
-                    <td>
-                        <button class="btn-manage-row" onclick="openAppealModal('${student.id}')" style="border-color:#8e24aa;color:#8e24aa;">
-                            <i class="fa-solid fa-gavel"></i> إدراج طعن
-                        </button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        function openAppealModal(id) {
-            const student = appealsData.find(s => s.id == id) || {id, surname: 'طالب', name: 'غير معروف', currentStream: ''};
-            document.getElementById('appealStudentId').value = student.id;
-            document.getElementById('appealStudentTitle').innerHTML = `التلميذ: <b>${student.surname} ${student.name}</b>`;
-            document.getElementById('appealModal').style.display = 'flex';
-        }
-
-        function closeAppealModal() {
-            document.getElementById('appealModal').style.display = 'none';
-        }
-
-        function submitAppeal() {
-            const id = document.getElementById('appealStudentId').value;
-            const newStream = document.getElementById('appealStreamSelect').value;
-            if (newStream) {
-                showAlert('تم تسجيل الطعن', `تم تسجيل طلب تغيير الشعبة إلى ${newStream} للتلميذ ${id}.`, 'success');
-                closeAppealModal();
-                // يمكن تحديث الجدول هنا إذا لزم
-            } else {
-                showAlert('خطأ', 'يرجى اختيار الشعبة.', 'error');
-            }
+            XLSX.utils.book_append_sheet(wb, ws, "الإحصائيات");
+            XLSX.writeFile(wb, `إحصائيات_التوجيه_${activeYear}.xlsx`);
+            showAlert('تم التصدير', 'تم تصدير الإحصائيات بنجاح.', 'success');
         }
 
         function showAlert(title, text, icon) {
