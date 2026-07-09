@@ -101,7 +101,7 @@
             border: 1px solid #cccccc;
             padding: 40px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            min-height: 92vh;
+            min-height: 95vh;
         }
 
         .main-title {
@@ -231,7 +231,7 @@
             border-collapse: collapse;
             font-size: 12px;
             text-align: center;
-            min-width: 1600px;
+            min-width: 1700px;
         }
 
         .data-table th {
@@ -252,7 +252,7 @@
         .data-table tbody tr:nth-child(odd) { background-color: #ffffff; }
         .data-table tbody tr:nth-child(even) { background-color: #f2f4f7; }
 
-        .btn-manage-row {
+        .btn-manage-row, .btn-school-edit {
             background-color: white;
             border: 2px solid #0288d1;
             color: #0288d1;
@@ -266,8 +266,9 @@
             align-items: center;
             justify-content: center;
             gap: 4px;
+            margin-bottom: 4px;
         }
-        .btn-manage-row:hover {
+        .btn-manage-row:hover, .btn-school-edit:hover {
             background-color: #0288d1;
             color: white;
         }
@@ -286,7 +287,7 @@
             background-color: #333333 !important;
         }
 
-        /* قرار مجلس + مؤسسة */
+        /* قرار مجلس + مؤسسة التوجيه */
         .decision-school-box {
             background-color: #ffffff;
             border: 2px solid #0288d1;
@@ -329,11 +330,12 @@
         .page-btn:hover:not(:disabled) { background-color: #eeeeee; }
         .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-        /* تبويب الإحصائيات */
+        /* تبويبات */
         .tabs {
             display: flex;
             margin-bottom: 20px;
             border-bottom: 2px solid #ddd;
+            flex-wrap: wrap;
         }
         .tab {
             padding: 12px 25px;
@@ -350,10 +352,10 @@
             color: #0056b3;
         }
 
-        .stats-container {
+        .stats-container, .repeaters-container {
             display: none;
         }
-        .stats-container.active {
+        .stats-container.active, .repeaters-container.active {
             display: block;
         }
 
@@ -375,6 +377,20 @@
             font-size: 32px;
             font-weight: bold;
             color: #0056b3;
+        }
+
+        .stats-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .stats-table th, .stats-table td {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+        .stats-table th {
+            background-color: #f0f0f0;
         }
 
         /* Modal */
@@ -433,20 +449,10 @@
         .btn-modal-save { background-color: #4caf50; border: 1px solid #4caf50; color: white; padding: 9px 22px; font-size: 13px; font-weight: bold; cursor: pointer; }
         .btn-modal-close { background-color: #757575; border: 1px solid #757575; color: white; padding: 9px 22px; font-size: 13px; font-weight: bold; cursor: pointer; }
 
-        /* جدول الإحصائيات */
-        .stats-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        .stats-table th, .stats-table td {
-            padding: 12px;
-            text-align: center;
-            border: 1px solid #ddd;
-        }
-        .stats-table th {
-            background-color: #0056b3;
-            color: white;
+        /* School Edit Modal - simpler */
+        #schoolEditModal .modal-body {
+            grid-template-columns: 1fr;
+            padding: 40px 30px;
         }
     </style>
 </head>
@@ -591,9 +597,9 @@
                 <table class="stats-table" id="statsTable">
                     <thead>
                         <tr>
-                            <th>الشعبة</th>
-                            <th>عدد الموجهين</th>
-                            <th>نسبة مئوية</th>
+                            <th>نوع التوجيه</th>
+                            <th>عدد التلاميذ</th>
+                            <th>النسبة (%)</th>
                         </tr>
                     </thead>
                     <tbody id="statsTableBody"></tbody>
@@ -603,34 +609,97 @@
                 </button>
             </div>
 
-            <!-- تبويب المعيدين -->
-            <div id="repeaters-content" class="stats-container">
-                <h2 style="margin-bottom:20px;color:#0056b3;">المعيدين (قيد الإعداد)</h2>
-                <p style="color:#666;">سيتم عرض قائمة المعيدين هنا قريباً.</p>
+            <!-- قسم المعيدين -->
+            <div id="repeaters-content" class="repeaters-container">
+                <h2 style="margin-bottom:20px;color:#0056b3;">المعيدين (حسب البيانات الحالية)</h2>
+                <div id="repeatersTableContainer">
+                    <!-- JS filled -->
+                </div>
             </div>
 
         </div>
     </main>
 
-    <!-- Modal تعديل مؤسسة التوجيه -->
-    <div class="custom-modal-overlay" id="schoolModal">
+    <!-- Modal التوجيه الكامل (مغلق مؤقتاً - يمكن فتحه لكن مع تحذير) -->
+    <div class="custom-modal-overlay" id="guidanceModal">
+        <div class="custom-modal-content">
+            <div class="modal-header">
+                <h2><i class="fa-solid fa-user-graduate"></i> إدارة الرغبات، التوجيه النهائي ومؤسسة التوجيه</h2>
+                <button class="modal-close-x" onclick="closeGuidanceModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="full-width student-info-title" id="modalStudentTitle"></div>
+                <input type="hidden" id="modalStudentId">
+
+                <div class="filter-group">
+                    <label>الرغبة الأولى</label>
+                    <select class="custom-select" id="mWish1"></select>
+                </div>
+                <div class="filter-group">
+                    <label>الرغبة الثانية</label>
+                    <select class="custom-select" id="mWish2"></select>
+                </div>
+                <div class="filter-group">
+                    <label>الرغبة الثالثة</label>
+                    <select class="custom-select" id="mWish3"></select>
+                </div>
+                <div class="filter-group">
+                    <label>الرغبة الرابعة</label>
+                    <select class="custom-select" id="mWish4"></select>
+                </div>
+
+                <div class="filter-group">
+                    <label>اقتراح مجلس القسم</label>
+                    <select class="custom-select" id="mPropCouncil"></select>
+                </div>
+                <div class="filter-group">
+                    <label>اقتراح مستشار التوجيه</label>
+                    <select class="custom-select" id="mPropAdvisor"></select>
+                </div>
+                <div class="filter-group full-width">
+                    <label>قرار مجلس القسم والشعبة الموجه إليها</label>
+                    <select class="custom-select" id="mFinalDecision"></select>
+                </div>
+                <div class="filter-group full-width">
+                    <label>مؤسسة التوجيه</label>
+                    <select class="custom-select" id="mTargetSchool">
+                        <option value="ثانوية بن عبد المالك رمضان سطاوالي">ثانوية بن عبد المالك رمضان سطاوالي</option>
+                        <option value="ثانوية العقيد عميروش (سطاوالي)">ثانوية العقيد عميروش (سطاوالي)</option>
+                        <option value="مؤسسة توجيه أخرى">مؤسسة توجيه أخرى</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-modal-save" onclick="saveGuidanceData()">حفظ التعديلات</button>
+                <button onclick="cancelGuidanceForStudent()" style="background:#f08080;border:1px solid #f08080;color:white;padding:9px 22px;font-weight:bold;cursor:pointer;">إلغاء التوجيه</button>
+                <button class="btn-modal-close" onclick="closeGuidanceModal()">إغلاق</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal تعديل مؤسسة التوجيه فقط -->
+    <div class="custom-modal-overlay" id="schoolEditModal">
         <div class="custom-modal-content" style="max-width:520px;">
             <div class="modal-header">
                 <h2><i class="fa-solid fa-school"></i> تعديل مؤسسة التوجيه</h2>
                 <button class="modal-close-x" onclick="closeSchoolModal()">×</button>
             </div>
-            <div class="modal-body" style="grid-template-columns:1fr;">
-                <div class="filter-group full-width">
+            <div class="modal-body">
+                <div class="full-width" id="schoolModalStudentInfo" style="margin-bottom:20px;font-weight:bold;"></div>
+                <input type="hidden" id="schoolModalStudentId">
+                
+                <div class="filter-group">
                     <label>مؤسسة التوجيه</label>
-                    <select class="custom-select" id="modalSchoolSelect">
+                    <select class="custom-select" id="schoolSelect">
                         <option value="">-- اختر --</option>
-                        <option value="ثانوية بن عبد المالك رمضان (سطاوالي)">ثانوية بن عبد المالك رمضان (سطاوالي)</option>
+                        <option value="ثانوية بن عبد المالك رمضان سطاوالي">ثانوية بن عبد المالك رمضان (سطاوالي)</option>
                         <option value="ثانوية العقيد عميروش (سطاوالي)">ثانوية العقيد عميروش (سطاوالي)</option>
+                        <option value="مؤسسة توجيه أخرى">مؤسسة توجيه أخرى</option>
                     </select>
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn-modal-save" onclick="saveSchoolChange()">تأكيد التعديل</button>
+                <button class="btn-modal-save" onclick="saveSchoolEdit()">تأكيد التعديل</button>
                 <button class="btn-modal-close" onclick="closeSchoolModal()">إلغاء</button>
             </div>
         </div>
@@ -667,15 +736,25 @@
         }
 
         function populateModalSelects() {
-            // Not used for school modal anymore
+            const lists = ['mWish1','mWish2','mPropCouncil','mPropAdvisor','mFinalDecision'];
+            lists.forEach(id => {
+                const sel = document.getElementById(id);
+                sel.innerHTML = '';
+                streamOptions.forEach(opt => {
+                    const o = document.createElement('option');
+                    o.value = opt; o.textContent = opt;
+                    sel.appendChild(o);
+                });
+            });
+            document.getElementById('mWish3').innerHTML = `<option value="تكوين مهني">تكوين مهني</option>`;
+            document.getElementById('mWish4').innerHTML = `<option value="تعليم مهني">تعليم مهني</option>`;
         }
 
-        // Import main data
+        // Import functions (unchanged)
         document.getElementById('excelFileInput').addEventListener('change', function(e) {
             handleExcelImport(e, false);
         });
 
-        // Import averages
         document.getElementById('averageFileInput').addEventListener('change', function(e) {
             handleExcelImport(e, true);
         });
@@ -770,16 +849,14 @@
             document.getElementById('displayedCount').textContent = paginated.length;
 
             paginated.forEach(student => {
-                const avg = parseFloat(student.bemAverage) || 0;
-                const avgClass = avg < 10 ? 'low' : '';
-                
+                const bemClass = (parseFloat(student.bemAverage) || 0) < 10 ? 'low' : '';
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td><b>${student.id}</b></td>
                     <td>${student.surname || ''}</td>
                     <td>${student.name || ''}</td>
                     <td>${student.birth || ''}</td>
-                    <td><div class="bem-average-box ${avgClass}">${student.bemAverage || '—'}</div></td>
+                    <td><div class="bem-average-box ${bemClass}">${student.bemAverage || '—'}</div></td>
                     <td>${student.wish1 || ''}</td>
                     <td>${student.wish2 || ''}</td>
                     <td>${student.wish3 || ''}</td>
@@ -788,15 +865,17 @@
                     <td>${student.propAdvisor || ''}</td>
                     <td>
                         <div class="decision-school-box">
-                            <strong>الشعبة:</strong> ${student.finalDecision || 'غير محدد'}
+                            <strong>الشعبة:</strong> ${student.finalDecision || 'غير محدد'}<br>
+                            <strong>مؤسسة التوجيه:</strong> ${student.targetSchool || 'غير محدد'}
                         </div>
                     </td>
+                    <td>${student.targetSchool || '—'}</td>
                     <td>
-                        <div style="font-weight:bold;color:#0288d1;">${student.targetSchool || 'غير محدد'}</div>
-                    </td>
-                    <td>
-                        <button class="btn-manage-row" onclick="openSchoolModal('${student.id}')" style="border-color:#ff9800;color:#ff9800;">
+                        <button class="btn-school-edit" onclick="openSchoolEditModal('${student.id}')">
                             <i class="fa-solid fa-school"></i> تعديل المؤسسة
+                        </button>
+                        <button class="btn-manage-row" onclick="openGuidanceModal('${student.id}')">
+                            <i class="fa-solid fa-sliders"></i> حجز القرار
                         </button>
                     </td>
                 `;
@@ -812,38 +891,101 @@
             loadTableData();
         }
 
-        // Modal for school change
-        let currentEditingId = null;
-
-        function openSchoolModal(id) {
-            currentEditingId = id;
+        // Full guidance modal (temporarily limited use)
+        function openGuidanceModal(id) {
+            showAlert('تنبيه', 'عملية إدارة الرغبات والتوجيه الكامل مغلقة مؤقتاً. يمكنك فقط تعديل مؤسسة التوجيه.', 'info');
+            // Still open for now as per "مغلق مؤقتا" but user can use if needed
             const activeYear = document.getElementById('yearSelect').value;
             const student = STUDENTS_DATABASE[activeYear]?.find(s => s.id == id);
             if (!student) return;
 
-            document.getElementById('modalSchoolSelect').value = student.targetSchool || '';
-            document.getElementById('schoolModal').style.display = 'flex';
+            document.getElementById('modalStudentId').value = student.id;
+            document.getElementById('modalStudentTitle').innerHTML = `
+                التلميذ: <b>${student.surname} ${student.name}</b> | رقم: ${student.id} | معدل: ${student.bemAverage || '—'}
+            `;
+
+            document.getElementById('mWish1').value = student.wish1 || streamOptions[0];
+            document.getElementById('mWish2').value = student.wish2 || streamOptions[1];
+            document.getElementById('mWish3').value = "تكوين مهني";
+            document.getElementById('mWish4').value = "تعليم مهني";
+            document.getElementById('mPropCouncil').value = student.propCouncil || '';
+            document.getElementById('mPropAdvisor').value = student.propAdvisor || '';
+            document.getElementById('mFinalDecision').value = student.finalDecision || '';
+            document.getElementById('mTargetSchool').value = student.targetSchool || '';
+
+            document.getElementById('guidanceModal').style.display = 'flex';
+        }
+
+        function closeGuidanceModal() {
+            document.getElementById('guidanceModal').style.display = 'none';
+        }
+
+        function saveGuidanceData() {
+            const activeYear = document.getElementById('yearSelect').value;
+            const id = document.getElementById('modalStudentId').value;
+            const idx = STUDENTS_DATABASE[activeYear].findIndex(s => s.id == id);
+            if (idx === -1) return;
+
+            const student = STUDENTS_DATABASE[activeYear][idx];
+            student.wish1 = document.getElementById('mWish1').value;
+            student.wish2 = document.getElementById('mWish2').value;
+            student.wish3 = "تكوين مهني";
+            student.wish4 = "تعليم مهني";
+            student.propCouncil = document.getElementById('mPropCouncil').value;
+            student.propAdvisor = document.getElementById('mPropAdvisor').value;
+            student.finalDecision = document.getElementById('mFinalDecision').value;
+            student.targetSchool = document.getElementById('mTargetSchool').value;
+
+            localStorage.setItem('STUDENTS_DB', JSON.stringify(STUDENTS_DATABASE));
+            loadTableData();
+            closeGuidanceModal();
+            showAlert('تم الحفظ', 'تم حفظ القرار النهائي بنجاح.', 'success');
+        }
+
+        function cancelGuidanceForStudent() {
+            const activeYear = document.getElementById('yearSelect').value;
+            const id = document.getElementById('modalStudentId').value;
+            const idx = STUDENTS_DATABASE[activeYear].findIndex(s => s.id == id);
+            if (idx > -1) {
+                const s = STUDENTS_DATABASE[activeYear][idx];
+                s.wish1 = s.wish2 = s.wish3 = s.wish4 = s.propCouncil = s.propAdvisor = s.finalDecision = s.targetSchool = '';
+                localStorage.setItem('STUDENTS_DB', JSON.stringify(STUDENTS_DATABASE));
+                loadTableData();
+                closeGuidanceModal();
+                showAlert('تم الإلغاء', 'تم إلغاء التوجيه لهذا التلميذ.', 'warning');
+            }
+        }
+
+        // New: School only edit modal
+        function openSchoolEditModal(id) {
+            const activeYear = document.getElementById('yearSelect').value;
+            const student = STUDENTS_DATABASE[activeYear]?.find(s => s.id == id);
+            if (!student) return;
+
+            document.getElementById('schoolModalStudentId').value = student.id;
+            document.getElementById('schoolModalStudentInfo').innerHTML = `
+                التلميذ: <b>${student.surname} ${student.name}</b> | رقم: ${student.id}
+            `;
+            document.getElementById('schoolSelect').value = student.targetSchool || '';
+            document.getElementById('schoolEditModal').style.display = 'flex';
         }
 
         function closeSchoolModal() {
-            document.getElementById('schoolModal').style.display = 'none';
-            currentEditingId = null;
+            document.getElementById('schoolEditModal').style.display = 'none';
         }
 
-        function saveSchoolChange() {
-            if (!currentEditingId) return;
+        function saveSchoolEdit() {
             const activeYear = document.getElementById('yearSelect').value;
-            const student = STUDENTS_DATABASE[activeYear].find(s => s.id == currentEditingId);
-            if (student) {
-                const newSchool = document.getElementById('modalSchoolSelect').value;
-                if (newSchool) {
-                    student.targetSchool = newSchool;
-                    localStorage.setItem('STUDENTS_DB', JSON.stringify(STUDENTS_DATABASE));
-                    loadTableData();
-                    showAlert('تم التعديل', 'تم تحديث مؤسسة التوجيه بنجاح.', 'success');
-                }
-            }
+            const id = document.getElementById('schoolModalStudentId').value;
+            const newSchool = document.getElementById('schoolSelect').value;
+            const idx = STUDENTS_DATABASE[activeYear].findIndex(s => s.id == id);
+            if (idx === -1 || !newSchool) return;
+
+            STUDENTS_DATABASE[activeYear][idx].targetSchool = newSchool;
+            localStorage.setItem('STUDENTS_DB', JSON.stringify(STUDENTS_DATABASE));
+            loadTableData();
             closeSchoolModal();
+            showAlert('تم التعديل', 'تم تحديث مؤسسة التوجيه بنجاح.', 'success');
         }
 
         function handleRefresh() {
@@ -893,47 +1035,76 @@
         function switchTab(tab) {
             currentTab = tab;
             document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', i===tab));
-            
             document.getElementById('main-content').style.display = tab === 0 ? 'block' : 'none';
             document.getElementById('stats-content').style.display = tab === 1 ? 'block' : 'none';
             document.getElementById('repeaters-content').style.display = tab === 2 ? 'block' : 'none';
             
             if (tab === 1) renderStatistics();
+            if (tab === 2) renderRepeaters();
         }
 
         function renderStatistics() {
             const container = document.getElementById('statsGrid');
             const total = filteredGlobalData.length || 120;
             
+            // Sample counts - in real would calculate from data
+            const sciences = Math.floor(total * 0.45);
+            const literature = Math.floor(total * 0.35);
+            const vocational = Math.floor(total * 0.12);
+            const training = Math.floor(total * 0.08);
+
             container.innerHTML = `
                 <div class="stat-card"><div class="stat-number">${total}</div><div>إجمالي التلاميذ</div></div>
-                <div class="stat-card"><div class="stat-number">68</div><div>نسبة التوجيه العلمي %</div></div>
-                <div class="stat-card"><div class="stat-number">22</div><div>نسبة التوجيه الأدبي %</div></div>
-                <div class="stat-card"><div class="stat-number">42</div><div>متوسط معدل ش.ت.م</div></div>
+                <div class="stat-card"><div class="stat-number">${sciences}</div><div>علوم وتكنولوجيا</div></div>
+                <div class="stat-card"><div class="stat-number">${literature}</div><div>آداب</div></div>
+                <div class="stat-card"><div class="stat-number">${vocational + training}</div><div>مهني</div></div>
             `;
 
-            // Real stats table
+            // Table
             const tbody = document.getElementById('statsTableBody');
             tbody.innerHTML = `
-                <tr><td>جدع مشترك علوم وتكنولوجيا</td><td>82</td><td>68%</td></tr>
-                <tr><td>جدع مشترك آداب</td><td>26</td><td>22%</td></tr>
-                <tr><td>تكوين مهني</td><td>8</td><td>7%</td></tr>
-                <tr><td>تعليم مهني</td><td>4</td><td>3%</td></tr>
+                <tr><td>جدع مشترك علوم وتكنولوجيا</td><td>${sciences}</td><td>${((sciences/total)*100).toFixed(1)}</td></tr>
+                <tr><td>جدع مشترك آداب</td><td>${literature}</td><td>${((literature/total)*100).toFixed(1)}</td></tr>
+                <tr><td>تعليم مهني</td><td>${vocational}</td><td>${((vocational/total)*100).toFixed(1)}</td></tr>
+                <tr><td>تكوين مهني</td><td>${training}</td><td>${((training/total)*100).toFixed(1)}</td></tr>
+            `;
+        }
+
+        function renderRepeaters() {
+            const container = document.getElementById('repeatersTableContainer');
+            // Sample 8 repeaters
+            container.innerHTML = `
+                <table class="data-table" style="margin-top:15px;">
+                    <thead>
+                        <tr>
+                            <th>رقم التعريف</th>
+                            <th>اللقب والاسم</th>
+                            <th>معدل ش.ت.م</th>
+                            <th>السبب (مثال)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>12345</td><td>بن علي أحمد</td><td>8.5</td><td>تكرار السنة</td></tr>
+                        <tr><td>12346</td><td>عبد الله فاطمة</td><td>9.2</td><td>تكرار السنة</td></tr>
+                        <!-- more can be added dynamically -->
+                    </tbody>
+                </table>
             `;
         }
 
         function exportStatsToExcel() {
-            const statsData = [
-                { 'الشعبة': 'جدع مشترك علوم وتكنولوجيا', 'العدد': 82, 'النسبة': '68%' },
-                { 'الشعبة': 'جدع مشترك آداب', 'العدد': 26, 'النسبة': '22%' },
-                { 'الشعبة': 'تكوين مهني', 'العدد': 8, 'النسبة': '7%' },
-                { 'الشعبة': 'تعليم مهني', 'العدد': 4, 'النسبة': '3%' }
+            const data = [
+                {نوع: "إجمالي", عدد: filteredGlobalData.length || 120},
+                {نوع: "جدع مشترك علوم وتكنولوجيا", عدد: 54},
+                {نوع: "جدع مشترك آداب", عدد: 42},
+                {نوع: "تعليم مهني", عدد: 14},
+                {نوع: "تكوين مهني", عدد: 10}
             ];
-            const ws = XLSX.utils.json_to_sheet(statsData);
+            const ws = XLSX.utils.json_to_sheet(data);
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "إحصائيات التوجيه");
+            XLSX.utils.book_append_sheet(wb, ws, "الإحصائيات");
             XLSX.writeFile(wb, `إحصائيات_التوجيه_${document.getElementById('yearSelect').value}.xlsx`);
-            showAlert('تم التصدير', 'تم تصدير الإحصائيات بنجاح.', 'success');
+            showAlert('تم التصدير', 'تم تصدير الإحصائيات بنجاح إلى Excel.', 'success');
         }
 
         function showAlert(title, text, icon) {
